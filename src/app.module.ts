@@ -1,3 +1,4 @@
+import { AlbumModule } from './api/album/album.module';
 import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
@@ -6,7 +7,7 @@ import { ArtistModule } from './api/artist/atrist.module';
 import { TrackModule } from './api/track/track.module';
 
 @Module({
-  imports: [ConfigModule.forRoot(), ArtistModule, TrackModule],
+  imports: [ConfigModule.forRoot(), ArtistModule, TrackModule, AlbumModule],
   controllers: [AppController],
   providers: [AppService],
 })

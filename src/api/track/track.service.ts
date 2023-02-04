@@ -52,4 +52,14 @@ export class TrackService {
       }
     });
   }
+
+  removeAlbum(albumId: string): void {
+    const allTracks = this.findAll();
+    allTracks.forEach((track) => {
+      if (track.albumId === albumId) {
+        const { id, ...body } = track;
+        this.update(track.id, { ...body, albumId: null });
+      }
+    });
+  }
 }
