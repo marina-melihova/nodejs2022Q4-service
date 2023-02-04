@@ -13,10 +13,14 @@ import {
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { TrackService } from './../track/track.service';
 
 @Controller({ path: 'artist' })
 export class ArtistController {
-  constructor(private artistService: ArtistService) {}
+  constructor(
+    private artistService: ArtistService,
+    private tracksService: TrackService,
+  ) {}
 
   @Get()
   findAll() {
@@ -56,5 +60,6 @@ export class ArtistController {
     if (!result) {
       throw new NotFoundException('Artist not found');
     }
+    this.tracksService.removeArtist(id);
   }
 }
