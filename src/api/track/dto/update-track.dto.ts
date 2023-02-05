@@ -1,9 +1,11 @@
-import { IsInt, IsNotEmpty } from 'class-validator';
+import { IsInt, IsNotEmpty, IsString } from 'class-validator';
 
 export class UpdateTrackDto {
   @IsNotEmpty()
+  @IsString()
   name: string;
 
+  @IsNotEmpty()
   @IsInt()
   duration: number;
 
