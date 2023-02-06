@@ -9,6 +9,6 @@ export class CreateTrackDto {
   @IsInt()
   duration: number;
 
-  artistId: string | null;
-  albumId: string | null;
+  artistId: string | null = null;
+  albumId: string | null = null;
 }

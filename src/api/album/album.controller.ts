@@ -14,12 +14,14 @@ import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { TrackService } from './../track/track.service';
+import { ArtistService } from './../artist/artist.service';
 
 @Controller('album')
 export class AlbumController {
   constructor(
     private albumService: AlbumService,
     private tracksService: TrackService,
+    private artistService: ArtistService,
   ) {}
 
   @Get()
@@ -38,6 +40,7 @@ export class AlbumController {
 
   @Post()
   create(@Body() dto: CreateAlbumDto) {
+    this.validateRefs(dto);
     return this.albumService.create(dto);
   }
 
@@ -46,6 +49,7 @@ export class AlbumController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateAlbumDto,
   ) {
+    this.validateRefs(dto);
     const album = this.albumService.update(id, dto);
     if (!album) {
       throw new NotFoundException('Album not found');
@@ -61,5 +65,16 @@ export class AlbumController {
       throw new NotFoundException('Album not found');
     }
     this.tracksService.removeAlbum(id);
+  }
+
+  validateRefs(dto: CreateAlbumDto | UpdateAlbumDto) {
+    if (dto.artistId) {
+      const isArtistExist = this.artistService.findOneById(dto.artistId);
+      if (!isArtistExist) {
+        throw new NotFoundException(
+          `Artist with ID = ${dto.artistId} not found`,
+        );
+      }
+    }
   }
 }

@@ -9,5 +9,5 @@ export class CreateAlbumDto {
   @IsInt()
   year: number;
 
-  artistId: string | null;
+  artistId: string | null = null;
 }
