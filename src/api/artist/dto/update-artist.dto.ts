@@ -6,5 +6,5 @@ export class UpdateArtistDto {
   name: string;
 
   @IsBoolean()
-  grammy: boolean = false;
+  grammy = false;
 }

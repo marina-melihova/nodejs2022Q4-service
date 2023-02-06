@@ -3,7 +3,6 @@ import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
 import { ConfigService } from '@nestjs/config';
 import { readFile } from 'fs/promises';
-import * as path from 'path';
 import * as yaml from 'yaml';
 import { AppModule } from './app.module';
 

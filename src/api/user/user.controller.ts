@@ -4,8 +4,6 @@ import {
   Post,
   Put,
   Delete,
-  HttpStatus,
-  Res,
   Body,
   Param,
   ParseUUIDPipe,
@@ -15,7 +13,6 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { Response } from 'express';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
