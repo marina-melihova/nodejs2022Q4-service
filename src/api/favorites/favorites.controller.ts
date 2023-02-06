@@ -14,7 +14,7 @@ import { ArtistService } from '../artist/artist.service';
 import { TrackService } from '../track/track.service';
 import { FavoritesService } from './favorites.service';
 
-@Controller({ path: 'favs' })
+@Controller('favs')
 export class FavoritesController {
   constructor(
     private favoritesService: FavoritesService,

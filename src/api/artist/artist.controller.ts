@@ -16,7 +16,7 @@ import { UpdateArtistDto } from './dto/update-artist.dto';
 import { TrackService } from './../track/track.service';
 import { AlbumService } from './../album/album.service';
 
-@Controller({ path: 'artist' })
+@Controller('artist')
 export class ArtistController {
   constructor(
     private artistService: ArtistService,

@@ -4,10 +4,14 @@ import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
 import { Artist } from './interfaces/artist.interface';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
+import { FavoritesService } from './../favorites/favorites.service';
 
 @Injectable()
 export class ArtistService {
-  constructor(private db: InMemoryDBStorage) {}
+  constructor(
+    private db: InMemoryDBStorage,
+    private favoritesService: FavoritesService,
+  ) {}
 
   findAll(): Artist[] {
     return this.db.artists;
@@ -39,6 +43,12 @@ export class ArtistService {
     if (idx === -1) {
       return false;
     }
+
+    const result = this.favoritesService.findOneId('artists', id);
+    if (!result) {
+      this.favoritesService.removeId('artists', id);
+    }
+
     this.db.artists.splice(idx, 1);
     return true;
   }

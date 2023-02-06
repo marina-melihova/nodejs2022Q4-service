@@ -13,6 +13,6 @@ export interface ICreateUserDto {
 }
 
 export interface IUpdatePasswordDto {
-  oldPassword: string; // previous password
-  newPassword: string; // new password
+  oldPassword: string;
+  newPassword: string;
 }

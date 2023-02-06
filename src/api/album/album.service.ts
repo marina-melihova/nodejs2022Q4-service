@@ -4,10 +4,14 @@ import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
 import { Album } from './interfaces/album.interface';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { FavoritesService } from './../favorites/favorites.service';
 
 @Injectable()
 export class AlbumService {
-  constructor(private db: InMemoryDBStorage) {}
+  constructor(
+    private db: InMemoryDBStorage,
+    private favoritesService: FavoritesService,
+  ) {}
 
   findAll(): Album[] {
     return this.db.albums;
@@ -39,6 +43,12 @@ export class AlbumService {
     if (idx === -1) {
       return false;
     }
+
+    const result = this.favoritesService.findOneId('albums', id);
+    if (!result) {
+      this.favoritesService.removeId('albums', id);
+    }
+
     this.db.albums.splice(idx, 1);
     return true;
   }

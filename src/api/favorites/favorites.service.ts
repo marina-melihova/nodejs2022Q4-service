@@ -32,6 +32,16 @@ export class FavoritesService {
     };
   }
 
+  findOneId(type: string, id: string): boolean {
+    const idx = this.db.favorites[type].findIndex(
+      (entityId) => entityId === id,
+    );
+    if (idx !== -1) {
+      return false;
+    }
+    return true;
+  }
+
   addId(type: string, id: string): number | null {
     const idx = this.db.favorites[type].findIndex(
       (entityId) => entityId === id,

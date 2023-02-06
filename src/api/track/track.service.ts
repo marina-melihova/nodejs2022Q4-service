@@ -4,10 +4,14 @@ import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
 import { Track } from './interfaces/track.interface';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
+import { FavoritesService } from './../favorites/favorites.service';
 
 @Injectable()
 export class TrackService {
-  constructor(private db: InMemoryDBStorage) {}
+  constructor(
+    private db: InMemoryDBStorage,
+    private favoritesService: FavoritesService,
+  ) {}
 
   findAll(): Track[] {
     return this.db.tracks;
@@ -39,6 +43,12 @@ export class TrackService {
     if (idx === -1) {
       return false;
     }
+
+    const result = this.favoritesService.findOneId('albums', id);
+    if (!result) {
+      this.favoritesService.removeId('albums', id);
+    }
+
     this.db.tracks.splice(idx, 1);
     return true;
   }
