@@ -1,3 +1,4 @@
+import { HeadersInterceptor } from './interceptors/headers.interceptor';
 import { NestFactory } from '@nestjs/core';
 import { ValidationPipe } from '@nestjs/common';
 import { SwaggerModule } from '@nestjs/swagger';
@@ -10,6 +11,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
   app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalInterceptors(new HeadersInterceptor());
 
   const configService = app.get(ConfigService);
   const PORT = configService.get('PORT') || 4000;
