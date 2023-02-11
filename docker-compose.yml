@@ -7,8 +7,9 @@ services:
     environment:
       PORT: ${PORT}
     volumes:
-      - ./src:/usr/app/src
-      - nodemodules:/usr/app/node_modules
+      - ./src:/home/app/src
+      - logs:/home/app/logs
+      - nodemodules:/home/app/node_modules
     depends_on:
       - db
     networks:
@@ -32,6 +33,8 @@ volumes:
     name: nodemodules
   postgres:
     name: postgres
+  logs:
+    name: logs
 
 networks:
   network_1:

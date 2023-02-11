@@ -1,13 +1,13 @@
 FROM node:alpine3.16
 
-WORKDIR /usr/app
-COPY package.json package-lock.json ./
+RUN mkdir /home/app
 
-# RUN apt-get update
+WORKDIR /home/app
+
+COPY package*.json ./
+
 RUN npm ci && npm cache clean --force
 
-#COPY . /app
-# -or-
 COPY . .
 
-CMD ["npm", "run", "start:dev"]
+CMD npm run start:dev > /home/app/logs/app.log
