@@ -13,6 +13,7 @@ services:
       - db
     networks:
       - network_1
+    restart: on-failure
   db:
     image: webshaman/nodejs2022q4-service:db
     build: ./db
@@ -24,6 +25,7 @@ services:
       - .env
     environment:
       - PG_DATA=/var/lib/postgres/data
+    restart: on-failure
 
 volumes:
   nodemodules:
