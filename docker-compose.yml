@@ -1,0 +1,39 @@
+services:
+  app:
+    image: webshaman/nodejs2022q4-service:nest
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    environment:
+      PORT: ${PORT}
+    volumes:
+      - ./src:/usr/app/src
+      - nodemodules:/usr/app/node_modules
+    depends_on:
+      - db
+    networks:
+      - network_1
+  db:
+    image: webshaman/nodejs2022q4-service:db
+    build: ./db
+    networks:
+      - network_1
+    volumes:
+      - postgres:/var/lib/postgres/data
+    env_file:
+      - .env
+    environment:
+      - PG_DATA=/var/lib/postgres/data
+
+volumes:
+  nodemodules:
+    name: nodemodules
+  postgres:
+    name: postgres
+
+networks:
+  network_1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16
