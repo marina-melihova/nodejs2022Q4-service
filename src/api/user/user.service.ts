@@ -1,62 +1,44 @@
 import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { InMemoryDBStorage } from './../../store/in-memory.db.storage';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from './user.entity';
+import { User } from './entities/user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(private db: InMemoryDBStorage) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-  create(dto: CreateUserDto) {
-    const currentDate = Date.now();
-    const newUser = new User({
-      id: uuidv4(),
-      ...dto,
-      version: 1,
-      createdAt: currentDate,
-      updatedAt: currentDate,
-    });
-    this.db.users.push(newUser);
-    return newUser;
+  async create(dto: CreateUserDto): Promise<User> {
+    const newUser = this.userRepository.create(dto);
+    return await this.userRepository.save(newUser);
   }
 
-  findAll() {
-    return this.db.users;
+  async findAll(): Promise<User[] | null> {
+    return this.userRepository.find();
   }
 
-  findOneById(id: string): User | null {
-    const user = this.db.users.find((user) => user.id === id);
+  async findOneById(id: string): Promise<User | null> {
+    return this.userRepository.findOneBy({ id });
+  }
+
+  async update(id: string, dto: UpdatePasswordDto): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ id });
+
     if (!user) return null;
-    return user;
-  }
 
-  update(id: string, dto: UpdatePasswordDto): User | null {
-    const idx = this.db.users.findIndex((user) => user.id === id);
-    if (idx === -1) return null;
-
-    const user = this.db.users[idx];
     if (user.password !== dto.oldPassword)
       throw new Error('Old Password is wrong');
 
-    const updatedUser = new User({
-      ...user,
-      password: dto.newPassword,
-      version: user.version + 1,
-      updatedAt: Date.now(),
-    });
-
-    this.db.users.splice(idx, 1, updatedUser);
-    return updatedUser;
+    await this.userRepository.update(id, { password: dto.newPassword });
+    return this.userRepository.findOneBy({ id });
   }
 
-  delete(id: string): boolean {
-    const idx = this.db.users.findIndex((user) => user.id === id);
-    if (idx === -1) {
-      return false;
-    }
-    this.db.users.splice(idx, 1);
-    return true;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.userRepository.delete(id);
+    return result.affected !== 0;
   }
 }
