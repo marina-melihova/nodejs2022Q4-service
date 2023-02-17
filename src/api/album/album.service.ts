@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
+import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
 import { Album } from './interfaces/album.interface';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';

@@ -1,32 +1,29 @@
 services:
   app:
-    image: webshaman/nodejs2022q4-service:nest
+    image: webshaman/nodejs2022q4-service:app
     build: .
     ports:
       - ${PORT}:${PORT}
-    environment:
-      PORT: ${PORT}
+    env_file:
+      - .env
     volumes:
-      - ./src:/home/app/src
-      - logs:/home/app/logs
+      - ./:/home/app
       - nodemodules:/home/app/node_modules
     depends_on:
       - db
     networks:
       - network_1
     restart: on-failure
+    command: npm run start:dev
   db:
     image: webshaman/nodejs2022q4-service:db
     build: ./db
     networks:
       - network_1
     volumes:
-      - postgres:/var/lib/postgres/data
-      - logs:/log
+      - postgres:/var/lib/postgresql/data
     env_file:
       - .env
-    environment:
-      - PG_DATA=/var/lib/postgres/data
     restart: always
     command: postgres -c logging_collector=on -c log_destination=stderr
 
@@ -35,8 +32,6 @@ volumes:
     name: nodemodules
   postgres:
     name: postgres
-  logs:
-    name: logs
 
 networks:
   network_1:

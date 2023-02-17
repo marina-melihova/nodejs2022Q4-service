@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
+import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
 import { FavoritesResponse } from './interfaces/favorites.interface';
 import { Track } from 'src/api/track/interfaces/track.interface';
 import { Album } from 'src/api/album/interfaces/album.interface';
