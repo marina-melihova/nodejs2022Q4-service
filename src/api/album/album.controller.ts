@@ -13,25 +13,23 @@ import {
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { TrackService } from './../track/track.service';
-import { ArtistService } from './../artist/artist.service';
+// import { TrackService } from './../track/track.service';
+// import { ArtistService } from './../artist/artist.service';
 
 @Controller('album')
 export class AlbumController {
   constructor(
-    private albumService: AlbumService,
-    private tracksService: TrackService,
-    private artistService: ArtistService,
+    private albumService: AlbumService, // private tracksService: TrackService, // private artistService: ArtistService,
   ) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.albumService.findAll();
   }
 
   @Get(':id')
-  findOneById(@Param('id', new ParseUUIDPipe()) id: string) {
-    const album = this.albumService.findOneById(id);
+  async findOneById(@Param('id', new ParseUUIDPipe()) id: string) {
+    const album = await this.albumService.findOneById(id);
     if (!album) {
       throw new NotFoundException('Album not found');
     }
@@ -39,18 +37,23 @@ export class AlbumController {
   }
 
   @Post()
-  create(@Body() dto: CreateAlbumDto) {
-    this.validateRefs(dto);
-    return this.albumService.create(dto);
+  async create(@Body() dto: CreateAlbumDto) {
+    try {
+      const newAlbum = await this.albumService.create(dto);
+      return newAlbum;
+    } catch {
+      throw new NotFoundException(`Artist with ID = ${dto.artistId} not found`);
+    }
   }
 
   @Put(':id')
-  update(
+  async update(
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateAlbumDto,
   ) {
-    this.validateRefs(dto);
-    const album = this.albumService.update(id, dto);
+    // this.validateRefs(dto);
+
+    const album = await this.albumService.update(id, dto);
     if (!album) {
       throw new NotFoundException('Album not found');
     }
@@ -59,14 +62,14 @@ export class AlbumController {
 
   @Delete(':id')
   @HttpCode(204)
-  delete(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = this.albumService.delete(id);
+  async delete(@Param('id', new ParseUUIDPipe()) id: string) {
+    const result = await this.albumService.delete(id);
     if (!result) {
       throw new NotFoundException('Album not found');
     }
-    this.tracksService.removeAlbum(id);
+    // this.tracksService.removeAlbum(id);
   }
-
+  /*
   validateRefs(dto: CreateAlbumDto | UpdateAlbumDto) {
     if (dto.artistId) {
       const isArtistExist = this.artistService.findOneById(dto.artistId);
@@ -77,4 +80,5 @@ export class AlbumController {
       }
     }
   }
+*/
 }

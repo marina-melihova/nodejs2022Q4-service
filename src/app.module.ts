@@ -9,13 +9,13 @@ import { TrackModule } from './api/track/track.module';
 import { FavoritesModule } from './api/favorites/favorites.module';
 import { UserModule } from './api/user/user.module';
 import configService from './config/ormconfig';
+import { EntityValidationPipe } from './pipes/entity-validation.pipe';
 
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
     ArtistModule,
     TrackModule,
-    AlbumModule,
     FavoritesModule,
     UserModule,
     TypeOrmModule.forRoot(configService),

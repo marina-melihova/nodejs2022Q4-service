@@ -1,18 +1,47 @@
-import { v4 as uuidv4 } from 'uuid';
+// import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
-import { Artist } from './interfaces/artist.interface';
+// import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
+import { Artist } from './entity/artist.entity';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { FavoritesService } from './../favorites/favorites.service';
+// import { FavoritesService } from './../favorites/favorites.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistService {
   constructor(
-    private db: InMemoryDBStorage,
-    private favoritesService: FavoritesService,
+    @InjectRepository(Artist)
+    private artistRepository: Repository<Artist>, // private favoritesService: FavoritesService,
   ) {}
 
+  async create(dto: CreateArtistDto): Promise<Artist> {
+    const artist = this.artistRepository.create(dto);
+    return this.artistRepository.save(artist);
+  }
+
+  async findAll(): Promise<Artist[]> {
+    return this.artistRepository.find();
+  }
+
+  async findOneById(id: string): Promise<Artist | null> {
+    return this.artistRepository.findOne({ where: { id } });
+  }
+
+  async update(id: string, dto: UpdateArtistDto): Promise<Artist | null> {
+    const artist: Artist = await this.findOneById(id);
+    if (!artist) {
+      return null;
+    }
+    const updatedArtist = await this.artistRepository.save({ id, ...dto });
+    return updatedArtist;
+  }
+
+  async delete(id: string) {
+    const result = await this.artistRepository.delete({ id });
+    return result.affected !== 0;
+  }
+  /*
   findAll(): Artist[] {
     return this.db.artists;
   }
@@ -52,4 +81,5 @@ export class ArtistService {
     this.db.artists.splice(idx, 1);
     return true;
   }
+*/
 }

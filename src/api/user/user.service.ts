@@ -17,7 +17,7 @@ export class UserService {
     return await this.userRepository.save(newUser);
   }
 
-  async findAll(): Promise<User[] | null> {
+  async findAll(): Promise<User[]> {
     return this.userRepository.find();
   }
 
@@ -33,8 +33,11 @@ export class UserService {
     if (user.password !== dto.oldPassword)
       throw new Error('Old Password is wrong');
 
-    await this.userRepository.update(id, { password: dto.newPassword });
-    return this.userRepository.findOneBy({ id });
+    const updatedUser = await this.userRepository.save({
+      id,
+      password: dto.newPassword,
+    });
+    return updatedUser;
   }
 
   async delete(id: string): Promise<boolean> {

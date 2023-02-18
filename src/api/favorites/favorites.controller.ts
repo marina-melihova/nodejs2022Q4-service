@@ -8,39 +8,45 @@ import {
   Delete,
   HttpCode,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
+  SetMetadata,
 } from '@nestjs/common';
-import { AlbumService } from '../album/album.service';
+// import { AlbumService } from '../album/album.service';
 import { ArtistService } from '../artist/artist.service';
-import { TrackService } from '../track/track.service';
+// import { TrackService } from '../track/track.service';
 import { FavoritesService } from './favorites.service';
+import { Artist } from '../artist/entity/artist.entity';
+import { EntityValidationPipe } from '../../pipes/entity-validation.pipe';
+import { Repository } from 'typeorm';
 
 @Controller('favs')
+@UseInterceptors(ClassSerializerInterceptor)
 export class FavoritesController {
   constructor(
-    private favoritesService: FavoritesService,
-    private artistService: ArtistService,
-    private albumService: AlbumService,
-    private trackService: TrackService,
+    private favoritesService: FavoritesService, // private artistService: ArtistService, // private albumService: AlbumService, // private trackService: TrackService,
   ) {}
-
+  /*
+  private async isEntityExist(type: string, id: string) {
+    const result = await this.favoritesService.findOneById();
+  }
+*/
   @Get()
-  findAll() {
+  async findAll() {
     return this.favoritesService.findAll();
   }
 
   @Post('/artist/:id')
-  addArtist(@Param('id', new ParseUUIDPipe()) id: string) {
-    const artist = this.artistService.findOneById(id);
-    if (!artist) {
-      throw new UnprocessableEntityException('Artist does not exist');
-    }
-    const result = this.favoritesService.addId('artists', id);
+  async addArtist(
+    @Param('id', ParseUUIDPipe, EntityValidationPipe) artist: Artist,
+  ) {
+    const result = await this.favoritesService.addToFavorite('artists', artist);
     if (!result) {
       return { message: 'Artist with same ID was already added to Favorites' };
     }
     return { message: 'Artist was successfully added' };
   }
-
+  /*
   @Post('/album/:id')
   addAlbum(@Param('id', new ParseUUIDPipe()) id: string) {
     const album = this.albumService.findOneById(id);
@@ -93,4 +99,5 @@ export class FavoritesController {
       throw new NotFoundException('Track not found');
     }
   }
+*/
 }

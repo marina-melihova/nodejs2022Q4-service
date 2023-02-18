@@ -1,18 +1,50 @@
-import { v4 as uuidv4 } from 'uuid';
+import { Album } from './entity/album.entity';
+// import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
-import { Album } from './interfaces/album.interface';
+// import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
+// import { Album } from './interfaces/album.interface';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { FavoritesService } from './../favorites/favorites.service';
+// import { FavoritesService } from './../favorites/favorites.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
   constructor(
-    private db: InMemoryDBStorage,
-    private favoritesService: FavoritesService,
+    @InjectRepository(Album)
+    private albumRepository: Repository<Album>, // private favoritesService: FavoritesService,
   ) {}
+  async create(dto: CreateAlbumDto): Promise<Album> {
+    const album = this.albumRepository.create(dto);
+    return this.albumRepository.save(album);
+  }
 
+  async findAll(): Promise<Album[]> {
+    return this.albumRepository.find({ loadRelationIds: true });
+  }
+
+  async findOneById(id: string): Promise<Album | null> {
+    return this.albumRepository.findOne({
+      where: { id },
+      loadRelationIds: true,
+    });
+  }
+
+  async update(id: string, dto: UpdateAlbumDto): Promise<Album | null> {
+    const album: Album = await this.findOneById(id);
+    if (!album) {
+      return null;
+    }
+    const updatedAlbum = await this.albumRepository.save({ id, ...dto });
+    return updatedAlbum;
+  }
+
+  async delete(id: string) {
+    const result = await this.albumRepository.delete({ id });
+    return result.affected !== 0;
+  }
+  /*
   findAll(): Album[] {
     return this.db.albums;
   }
@@ -62,4 +94,5 @@ export class AlbumService {
       }
     });
   }
+*/
 }
