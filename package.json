@@ -23,7 +23,8 @@
     "typeorm:cli": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/config/ormconfig.ts",
     "migration:gen": "npm run typeorm:cli -- migration:generate src/migrations/schema",
     "migration:create": "npx typeorm migration:create src/migrations/create",
-    "migration:run": "npm run typeorm:cli -- migration:run"
+    "migration:run": "npm run typeorm:cli -- migration:run",
+    "terminal:app": "docker exec -it app sh"
   },
   "dependencies": {
     "@nestjs/common": "^8.0.0",

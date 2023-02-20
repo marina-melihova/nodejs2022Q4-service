@@ -1,6 +1,7 @@
 services:
   app:
-    image: webshaman/nodejs2022q4-service:app
+    image: nodejs2022q4-service:app
+    container_name: app
     build: .
     ports:
       - ${PORT}:${PORT}
@@ -14,9 +15,9 @@ services:
     networks:
       - network_1
     restart: on-failure
-    command: npm run start:dev
   db:
-    image: webshaman/nodejs2022q4-service:db
+    image: nodejs2022q4-service:db
+    container_name: db
     build: ./db
     networks:
       - network_1
