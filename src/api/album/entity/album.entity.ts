@@ -20,10 +20,8 @@ export class Album implements IAlbum {
   @Column()
   year: number;
 
-  // @Column({ nullable: true })
-  @ManyToOne(() => Artist, (artist) => artist.id, {
+  @ManyToOne(() => Artist, {
     onDelete: 'SET NULL',
-    eager: true,
     cascade: true,
   })
   @JoinColumn()

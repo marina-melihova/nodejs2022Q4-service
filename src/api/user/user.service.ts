@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, ForbiddenException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -26,18 +26,19 @@ export class UserService {
   }
 
   async update(id: string, dto: UpdatePasswordDto): Promise<User | null> {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.findOneById(id);
 
     if (!user) return null;
 
     if (user.password !== dto.oldPassword)
-      throw new Error('Old Password is wrong');
+      throw new ForbiddenException('Old Password is wrong');
 
-    const updatedUser = await this.userRepository.save({
+    await this.userRepository.save({
       id,
       password: dto.newPassword,
     });
-    return updatedUser;
+
+    return this.findOneById(id);
   }
 
   async delete(id: string): Promise<boolean> {

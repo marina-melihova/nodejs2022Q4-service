@@ -10,14 +10,18 @@ import {
   NotFoundException,
   ForbiddenException,
   HttpCode,
+  HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
+import { User } from './entity/user.entity';
+import { NotFoundInterceptor } from '../../interceptors/not-found.interceptor';
 
 @UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(NotFoundInterceptor)
 @Controller('user')
 export class UserController {
   constructor(private userService: UserService) {}
@@ -28,12 +32,8 @@ export class UserController {
   }
 
   @Get(':id')
-  async findOne(@Param('id', new ParseUUIDPipe()) id: string) {
-    const user = await this.userService.findOneById(id);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    return user;
+  async findOne(@Param('id', ParseUUIDPipe) id: string) {
+    return this.userService.findOneById(id);
   }
 
   @Post()
@@ -43,27 +43,15 @@ export class UserController {
 
   @Put(':id')
   async updatePassword(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdatePasswordDto,
   ) {
-    let updatedUser;
-    try {
-      updatedUser = await this.userService.update(id, dto);
-    } catch (error) {
-      throw new ForbiddenException(error.message);
-    }
-    if (!updatedUser) {
-      throw new NotFoundException('User not found');
-    }
-    return updatedUser;
+    return this.userService.update(id, dto);
   }
 
   @Delete(':id')
-  @HttpCode(204)
+  @HttpCode(HttpStatus.NO_CONTENT)
   async delete(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = await this.userService.delete(id);
-    if (!result) {
-      throw new NotFoundException('User not found');
-    }
+    return this.userService.delete(id);
   }
 }

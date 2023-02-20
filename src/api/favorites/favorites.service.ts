@@ -39,13 +39,16 @@ export class FavoritesService {
 
   async getResponse() {
     const fav = await this.findAll();
+    /*
     fav.albums.forEach((album: any) => {
       album.artistId = album.artistId?.id ?? null;
     });
+    
     fav.tracks.forEach((track: any) => {
       track.artistId = track.artistId?.id ?? null;
       track.albumId = track.albumId?.id ?? null;
     });
+    */
     return fav;
   }
 
@@ -66,8 +69,9 @@ export class FavoritesService {
     const nameEntity = entity.constructor.name;
     const typeEntity = FavEntity[nameEntity];
     const fav = await this.findAll();
-    fav[typeEntity].splice(entity.id, 1);
-    this.favoritesRepository.save(fav);
+    const idx = fav[typeEntity].findIndex((track) => track.id == entity.id);
+    fav[typeEntity].splice(idx, 1);
+    await this.favoritesRepository.save(fav);
   }
 
   async findOneById(type: string, id: string): Promise<Entity | null> {

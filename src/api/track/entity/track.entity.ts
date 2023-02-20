@@ -20,7 +20,6 @@ export class Track implements ITrack {
   @Column()
   duration: number;
 
-  // @Column({ nullable: true })
   @ManyToOne(() => Artist, {
     onDelete: 'SET NULL',
     cascade: true,
@@ -28,7 +27,6 @@ export class Track implements ITrack {
   @JoinColumn()
   artistId: string | null;
 
-  // @Column({ nullable: true })
   @ManyToOne(() => Album, {
     onDelete: 'SET NULL',
     cascade: true,

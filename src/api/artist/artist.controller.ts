@@ -4,19 +4,21 @@ import {
   Post,
   Body,
   Param,
-  NotFoundException,
   Put,
   Delete,
   HttpCode,
+  HttpStatus,
   ParseUUIDPipe,
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
+import { NotFoundInterceptor } from './../../interceptors/not-found.interceptor';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(NotFoundInterceptor)
 @Controller('artist')
 export class ArtistController {
   constructor(private artistService: ArtistService) {}
@@ -27,12 +29,8 @@ export class ArtistController {
   }
 
   @Get(':id')
-  async findOneById(@Param('id', new ParseUUIDPipe()) id: string) {
-    const artist = await this.artistService.findOneById(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
-    return artist;
+  async findOneById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.artistService.findOneById(id);
   }
 
   @Post()
@@ -42,24 +40,15 @@ export class ArtistController {
 
   @Put(':id')
   async update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateArtistDto,
   ) {
-    const artist = await this.artistService.update(id, dto);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
-    return artist;
+    return this.artistService.update(id, dto);
   }
 
   @Delete(':id')
-  @HttpCode(204)
-  async delete(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = await this.artistService.delete(id);
-    if (!result) {
-      throw new NotFoundException('Artist not found');
-    }
-    // this.tracksService.removeArtist(id);
-    // this.albumsService.removeArtist(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.artistService.delete(id);
   }
 }
