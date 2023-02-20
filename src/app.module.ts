@@ -1,4 +1,4 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { AppController } from './app.controller';
@@ -15,10 +15,10 @@ import { configService } from './config/ormconfig';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
-    forwardRef(() => ArtistModule),
-    forwardRef(() => AlbumModule),
-    forwardRef(() => TrackModule),
-    forwardRef(() => FavoritesModule),
+    ArtistModule,
+    AlbumModule,
+    TrackModule,
+    FavoritesModule,
     UserModule,
     TypeOrmModule.forRoot(configService),
   ],
