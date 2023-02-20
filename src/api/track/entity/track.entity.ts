@@ -22,14 +22,14 @@ export class Track implements ITrack {
 
   @ManyToOne(() => Artist, {
     onDelete: 'SET NULL',
-    cascade: true,
+    eager: true,
   })
   @JoinColumn()
   artistId: string | null;
 
   @ManyToOne(() => Album, {
     onDelete: 'SET NULL',
-    cascade: true,
+    eager: true,
   })
   @JoinColumn()
   albumId: string | null;

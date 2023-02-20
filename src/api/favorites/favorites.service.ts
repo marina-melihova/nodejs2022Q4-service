@@ -39,16 +39,16 @@ export class FavoritesService {
 
   async getResponse() {
     const fav = await this.findAll();
-    /*
+
     fav.albums.forEach((album: any) => {
       album.artistId = album.artistId?.id ?? null;
     });
-    
+
     fav.tracks.forEach((track: any) => {
       track.artistId = track.artistId?.id ?? null;
       track.albumId = track.albumId?.id ?? null;
     });
-    */
+
     return fav;
   }
 

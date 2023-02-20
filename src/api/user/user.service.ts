@@ -1,4 +1,8 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
@@ -13,6 +17,7 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
+    await this.isLoginExists(dto.login);
     const newUser = this.userRepository.create(dto);
     return await this.userRepository.save(newUser);
   }
@@ -22,7 +27,13 @@ export class UserService {
   }
 
   async findOneById(id: string): Promise<User | null> {
-    return this.userRepository.findOneBy({ id });
+    const user = await this.userRepository.findOneBy({ id });
+    return user ?? null;
+  }
+
+  async findOneByLogin(login: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ login });
+    return user ?? null;
   }
 
   async update(id: string, dto: UpdatePasswordDto): Promise<User | null> {
@@ -33,10 +44,7 @@ export class UserService {
     if (user.password !== dto.oldPassword)
       throw new ForbiddenException('Old Password is wrong');
 
-    await this.userRepository.save({
-      id,
-      password: dto.newPassword,
-    });
+    await this.userRepository.update(id, { password: dto.newPassword });
 
     return this.findOneById(id);
   }
@@ -44,5 +52,12 @@ export class UserService {
   async delete(id: string): Promise<boolean> {
     const result = await this.userRepository.delete(id);
     return result.affected !== 0;
+  }
+
+  async isLoginExists(login: string) {
+    const user = await this.findOneByLogin(login);
+    if (user) {
+      throw new BadRequestException(`User with login=${login} already exists`);
+    }
   }
 }

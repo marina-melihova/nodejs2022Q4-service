@@ -22,7 +22,7 @@ export class Album implements IAlbum {
 
   @ManyToOne(() => Artist, {
     onDelete: 'SET NULL',
-    cascade: true,
+    eager: true,
   })
   @JoinColumn()
   artistId: string | null;
