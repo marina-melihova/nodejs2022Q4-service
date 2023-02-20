@@ -9,18 +9,17 @@ import {
   Delete,
   HttpCode,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-// import { TrackService } from './../track/track.service';
-// import { ArtistService } from './../artist/artist.service';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('album')
 export class AlbumController {
-  constructor(
-    private albumService: AlbumService, // private tracksService: TrackService, // private artistService: ArtistService,
-  ) {}
+  constructor(private albumService: AlbumService) {}
 
   @Get()
   async findAll() {
@@ -51,13 +50,15 @@ export class AlbumController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateAlbumDto,
   ) {
-    // this.validateRefs(dto);
-
-    const album = await this.albumService.update(id, dto);
-    if (!album) {
-      throw new NotFoundException('Album not found');
+    try {
+      const album = await this.albumService.update(id, dto);
+      if (!album) {
+        throw new NotFoundException('Album not found');
+      }
+      return album;
+    } catch {
+      throw new NotFoundException(`Artist with ID = ${dto.artistId} not found`);
     }
-    return album;
   }
 
   @Delete(':id')
@@ -67,18 +68,5 @@ export class AlbumController {
     if (!result) {
       throw new NotFoundException('Album not found');
     }
-    // this.tracksService.removeAlbum(id);
   }
-  /*
-  validateRefs(dto: CreateAlbumDto | UpdateAlbumDto) {
-    if (dto.artistId) {
-      const isArtistExist = this.artistService.findOneById(dto.artistId);
-      if (!isArtistExist) {
-        throw new NotFoundException(
-          `Artist with ID = ${dto.artistId} not found`,
-        );
-      }
-    }
-  }
-*/
 }

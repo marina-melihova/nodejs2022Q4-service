@@ -9,19 +9,17 @@ import {
   Delete,
   HttpCode,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-// import { ArtistService } from './../artist/artist.service';
-// import { AlbumService } from './../album/album.service';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('track')
 export class TrackController {
-  constructor(
-    private trackService: TrackService, // private artistService: ArtistService,
-  ) // private albumService: AlbumService,
-  {}
+  constructor(private trackService: TrackService) {}
 
   @Get()
   async findAll() {
@@ -39,8 +37,12 @@ export class TrackController {
 
   @Post()
   async create(@Body() dto: CreateTrackDto) {
-    // this.validateRefs(dto);
-    return this.trackService.create(dto);
+    try {
+      const newTrack = await this.trackService.create(dto);
+      return newTrack;
+    } catch (error) {
+      throw new NotFoundException(`Entity with such ID not found`);
+    }
   }
 
   @Put(':id')
@@ -48,12 +50,16 @@ export class TrackController {
     @Param('id', new ParseUUIDPipe()) id: string,
     @Body() dto: UpdateTrackDto,
   ) {
-    // this.validateRefs(dto);
-    const track = await this.trackService.update(id, dto);
-    if (!track) {
-      throw new NotFoundException('Track not found');
+    try {
+      const track = await this.trackService.update(id, dto);
+      if (!track) {
+        throw new NotFoundException('Track not found');
+      }
+      return track;
+    } catch (error) {
+      console.log('error.message :>> ', error.message);
+      throw new NotFoundException(`Entity with such ID not found`);
     }
-    return track;
   }
 
   @Delete(':id')
@@ -64,23 +70,4 @@ export class TrackController {
       throw new NotFoundException('Track not found');
     }
   }
-  /*
-  validateRefs(dto: CreateTrackDto | UpdateTrackDto) {
-    if (dto.artistId) {
-      const isArtistExist = this.artistService.findOneById(dto.artistId);
-      if (!isArtistExist) {
-        throw new NotFoundException(
-          `Artist with ID = ${dto.artistId} not found`,
-        );
-      }
-    }
-
-    if (dto.albumId) {
-      const isAlbumExist = this.albumService.findOneById(dto.albumId);
-      if (!isAlbumExist) {
-        throw new NotFoundException(`Album with ID = ${dto.albumId} not found`);
-      }
-    }
-  }
-*/
 }

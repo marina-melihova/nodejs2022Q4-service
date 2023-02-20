@@ -3,101 +3,83 @@ import {
   Get,
   Post,
   Param,
-  NotFoundException,
-  UnprocessableEntityException,
   Delete,
   HttpCode,
   ParseUUIDPipe,
   UseInterceptors,
   ClassSerializerInterceptor,
-  SetMetadata,
 } from '@nestjs/common';
-// import { AlbumService } from '../album/album.service';
-import { ArtistService } from '../artist/artist.service';
-// import { TrackService } from '../track/track.service';
 import { FavoritesService } from './favorites.service';
-import { Artist } from '../artist/entity/artist.entity';
-import { EntityValidationPipe } from '../../pipes/entity-validation.pipe';
-import { Repository } from 'typeorm';
+import { Artist, Album, Track, Entity } from '..';
+import { EntityValidationPipe, EntityInFavsValidationPipe } from '../../pipes';
 
 @Controller('favs')
 @UseInterceptors(ClassSerializerInterceptor)
 export class FavoritesController {
-  constructor(
-    private favoritesService: FavoritesService, // private artistService: ArtistService, // private albumService: AlbumService, // private trackService: TrackService,
-  ) {}
-  /*
-  private async isEntityExist(type: string, id: string) {
-    const result = await this.favoritesService.findOneById();
-  }
-*/
+  constructor(private favoritesService: FavoritesService) {}
+
   @Get()
   async findAll() {
-    return this.favoritesService.findAll();
+    return this.favoritesService.getResponse();
   }
 
-  @Post('/artist/:id')
+  private async addEntity(entity: Entity) {
+    const nameEntity = entity.constructor.name;
+    const result = await this.favoritesService.addToFavorite(entity);
+    if (!result) {
+      return {
+        message: `${nameEntity} with the same ID already added to Favorites`,
+      };
+    }
+    return { message: `${nameEntity} successfully added` };
+  }
+
+  @Post(`/artist/:id`)
   async addArtist(
     @Param('id', ParseUUIDPipe, EntityValidationPipe) artist: Artist,
   ) {
-    const result = await this.favoritesService.addToFavorite('artists', artist);
-    if (!result) {
-      return { message: 'Artist with same ID was already added to Favorites' };
-    }
-    return { message: 'Artist was successfully added' };
+    this.addEntity(artist);
   }
-  /*
+
   @Post('/album/:id')
-  addAlbum(@Param('id', new ParseUUIDPipe()) id: string) {
-    const album = this.albumService.findOneById(id);
-    if (!album) {
-      throw new UnprocessableEntityException('Album does not exist');
-    }
-    const result = this.favoritesService.addId('albums', id);
-    if (!result) {
-      return { message: 'Album with same ID was already added to Favorites' };
-    }
-    return { message: 'Album was successfully added' };
+  async addAlbum(
+    @Param('id', ParseUUIDPipe, EntityValidationPipe) album: Album,
+  ) {
+    this.addEntity(album);
   }
 
   @Post('/track/:id')
-  addTrack(@Param('id', new ParseUUIDPipe()) id: string) {
-    const track = this.trackService.findOneById(id);
-    if (!track) {
-      throw new UnprocessableEntityException('Track does not exist');
-    }
-    const result = this.favoritesService.addId('tracks', id);
-    if (!result) {
-      return { message: 'Track with same ID was already added to Favorites' };
-    }
-    return { message: 'Track was successfully added' };
+  async addTrack(
+    @Param('id', ParseUUIDPipe, EntityValidationPipe) track: Track,
+  ) {
+    this.addEntity(track);
+  }
+
+  private async removeEntity(entity: Entity) {
+    this.favoritesService.removeFromFavorite(entity);
   }
 
   @Delete('/artist/:id')
   @HttpCode(204)
-  removeArtist(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = this.favoritesService.removeId('artists', id);
-    if (!result) {
-      throw new NotFoundException('Artist not found');
-    }
+  async removeArtist(
+    @Param('id', ParseUUIDPipe, EntityInFavsValidationPipe) artist: Artist,
+  ) {
+    this.removeEntity(artist);
   }
 
   @Delete('/album/:id')
   @HttpCode(204)
-  removeAlbum(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = this.favoritesService.removeId('albums', id);
-    if (!result) {
-      throw new NotFoundException('Album not found');
-    }
+  removeAlbum(
+    @Param('id', ParseUUIDPipe, EntityInFavsValidationPipe) album: Album,
+  ) {
+    this.removeEntity(album);
   }
 
   @Delete('/track/:id')
   @HttpCode(204)
-  removeTrack(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = this.favoritesService.removeId('tracks', id);
-    if (!result) {
-      throw new NotFoundException('Track not found');
-    }
+  removeTrack(
+    @Param('id', ParseUUIDPipe, EntityInFavsValidationPipe) track: Track,
+  ) {
+    this.removeEntity(track);
   }
-*/
 }

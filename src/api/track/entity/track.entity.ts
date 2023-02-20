@@ -1,18 +1,16 @@
-import { Exclude } from 'class-transformer';
-import { Album } from '../../album/entity/album.entity';
-import { Artist } from '../../artist/entity/artist.entity';
-// import { Favorite } from 'src/favorites/entities/favorite.entity';
 import {
   Column,
   Entity,
   JoinColumn,
   ManyToOne,
-  OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { Artist, Album, Favorites } from '../..';
+import { ITrack } from '../interfaces/track.interface';
 
 @Entity('track')
-export class Track {
+export class Track implements ITrack {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -22,21 +20,25 @@ export class Track {
   @Column()
   duration: number;
 
-  @Column({ nullable: true })
+  // @Column({ nullable: true })
   @ManyToOne(() => Artist, {
     onDelete: 'SET NULL',
-    eager: true,
     cascade: true,
   })
-  @JoinColumn({ name: 'artistId', referencedColumnName: 'id' })
+  @JoinColumn()
   artistId: string | null;
 
-  @Column({ nullable: true })
+  // @Column({ nullable: true })
   @ManyToOne(() => Album, {
     onDelete: 'SET NULL',
-    eager: true,
     cascade: true,
   })
-  @JoinColumn({ name: 'albumId', referencedColumnName: 'id' })
+  @JoinColumn()
   albumId: string | null;
+
+  @ManyToOne(() => Favorites, (fav) => fav.tracks, {
+    onDelete: 'CASCADE',
+  })
+  @Exclude()
+  fav: Favorites;
 }

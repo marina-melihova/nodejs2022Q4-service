@@ -9,19 +9,17 @@ import {
   Delete,
   HttpCode,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-// import { TrackService } from './../track/track.service';
-// import { AlbumService } from './../album/album.service';
 
+@UseInterceptors(ClassSerializerInterceptor)
 @Controller('artist')
 export class ArtistController {
-  constructor(
-    private artistService: ArtistService, // private tracksService: TrackService,
-  ) // private albumsService: AlbumService,
-  {}
+  constructor(private artistService: ArtistService) {}
 
   @Get()
   async findAll() {

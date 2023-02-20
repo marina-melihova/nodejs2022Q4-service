@@ -1,19 +1,17 @@
-import { Track } from './entity/track.entity';
-// import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-// import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
-// import { Track } from './interfaces/track.interface';
-import { CreateTrackDto } from './dto/create-track.dto';
-import { UpdateTrackDto } from './dto/update-track.dto';
-// import { FavoritesService } from './../favorites/favorites.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateTrackDto } from './dto/create-track.dto';
+import { UpdateTrackDto } from './dto/update-track.dto';
+import { Track } from './entity/track.entity';
 
 @Injectable()
 export class TrackService {
   constructor(
-    @InjectRepository(Track) private trackRepository: Repository<Track>, // private favoritesService: FavoritesService,
+    @InjectRepository(Track)
+    private trackRepository: Repository<Track>,
   ) {}
+
   async create(createTrackDto: CreateTrackDto) {
     const track = this.trackRepository.create(createTrackDto);
     return this.trackRepository.save(track);

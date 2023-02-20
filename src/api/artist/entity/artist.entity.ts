@@ -1,8 +1,10 @@
-import { Favorites } from './../../favorites/entity/favorites.entity';
 import { Column, Entity, ManyToOne, PrimaryGeneratedColumn } from 'typeorm';
+import { Exclude } from 'class-transformer';
+import { IArtist } from '../interfaces/artist.interface';
+import { Favorites } from './../../favorites/entity/favorites.entity';
 
 @Entity()
-export class Artist {
+export class Artist implements IArtist {
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
@@ -12,8 +14,9 @@ export class Artist {
   @Column()
   grammy: boolean;
 
-  @ManyToOne(() => Favorites, (fav) => fav.artists, {
+  @ManyToOne(() => Favorites, (fav) => fav.albums, {
     onDelete: 'CASCADE',
   })
+  @Exclude()
   fav: Favorites;
 }

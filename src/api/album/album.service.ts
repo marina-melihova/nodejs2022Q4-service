@@ -1,20 +1,17 @@
-import { Album } from './entity/album.entity';
-// import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-// import { InMemoryDBStorage } from '../../store/in-memory.db.storage';
-// import { Album } from './interfaces/album.interface';
-import { CreateAlbumDto } from './dto/create-album.dto';
-import { UpdateAlbumDto } from './dto/update-album.dto';
-// import { FavoritesService } from './../favorites/favorites.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { CreateAlbumDto } from './dto/create-album.dto';
+import { UpdateAlbumDto } from './dto/update-album.dto';
+import { Album } from './entity/album.entity';
 
 @Injectable()
 export class AlbumService {
   constructor(
     @InjectRepository(Album)
-    private albumRepository: Repository<Album>, // private favoritesService: FavoritesService,
+    private albumRepository: Repository<Album>,
   ) {}
+
   async create(dto: CreateAlbumDto): Promise<Album> {
     const album = this.albumRepository.create(dto);
     return this.albumRepository.save(album);

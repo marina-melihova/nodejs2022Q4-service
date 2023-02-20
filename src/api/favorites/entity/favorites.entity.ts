@@ -1,18 +1,22 @@
-// import { Album } from '../../album/entity/album.entity';
-import { Artist } from '../../artist/entity/artist.entity';
-// import { Track } from '../../track/entity/track.entity';
 import { Entity, JoinColumn, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { Exclude } from 'class-transformer';
+import { Artist, Album, Track, IFavorites } from '../..';
 
 @Entity('favorites')
-export class Favorites {
+export class Favorites implements IFavorites {
   @Exclude()
   @PrimaryGeneratedColumn('uuid')
   id: string;
 
-  @OneToMany(() => Artist, (artist) => artist.fav, {
-    cascade: true,
-  })
-  @JoinColumn({ referencedColumnName: 'id' })
+  @OneToMany(() => Artist, (artist) => artist.fav)
+  @JoinColumn()
   artists: Artist[];
+
+  @OneToMany(() => Album, (album) => album.fav)
+  @JoinColumn()
+  albums: Album[];
+
+  @OneToMany(() => Track, (track) => track.fav)
+  @JoinColumn()
+  tracks: Track[];
 }

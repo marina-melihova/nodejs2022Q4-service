@@ -12,7 +12,7 @@ import { Repository } from 'typeorm';
 export class ArtistService {
   constructor(
     @InjectRepository(Artist)
-    private artistRepository: Repository<Artist>, // private favoritesService: FavoritesService,
+    private artistRepository: Repository<Artist>,
   ) {}
 
   async create(dto: CreateArtistDto): Promise<Artist> {
