@@ -12,7 +12,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { NotFoundInterceptor } from './../../interceptors/not-found.interceptor';
+import { NotFoundInterceptor } from './../../interceptors';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';

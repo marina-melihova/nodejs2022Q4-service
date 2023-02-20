@@ -11,8 +11,8 @@ import {
   ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
-import { Artist, Album, Track, Entity } from '..';
 import { EntityValidationPipe, EntityInFavsValidationPipe } from '../../pipes';
+import { Artist, Album, Track, Entity } from '..';
 
 @Controller('favs')
 @UseInterceptors(ClassSerializerInterceptor)
@@ -28,21 +28,21 @@ export class FavoritesController {
   async addArtist(
     @Param('id', ParseUUIDPipe, EntityValidationPipe) artist: Artist,
   ) {
-    await this.addEntity(artist);
+    return this.addEntity(artist);
   }
 
   @Post('/album/:id')
   async addAlbum(
     @Param('id', ParseUUIDPipe, EntityValidationPipe) album: Album,
   ) {
-    await this.addEntity(album);
+    return this.addEntity(album);
   }
 
   @Post('/track/:id')
   async addTrack(
     @Param('id', ParseUUIDPipe, EntityValidationPipe) track: Track,
   ) {
-    await this.addEntity(track);
+    return this.addEntity(track);
   }
 
   @Delete('/artist/:id')
@@ -50,7 +50,7 @@ export class FavoritesController {
   async removeArtist(
     @Param('id', ParseUUIDPipe, EntityInFavsValidationPipe) artist: Artist,
   ) {
-    await this.removeEntity(artist);
+    return this.removeEntity(artist);
   }
 
   @Delete('/album/:id')
@@ -58,7 +58,7 @@ export class FavoritesController {
   async removeAlbum(
     @Param('id', ParseUUIDPipe, EntityInFavsValidationPipe) album: Album,
   ) {
-    await this.removeEntity(album);
+    return this.removeEntity(album);
   }
 
   @Delete('/track/:id')
@@ -66,7 +66,7 @@ export class FavoritesController {
   async removeTrack(
     @Param('id', ParseUUIDPipe, EntityInFavsValidationPipe) track: Track,
   ) {
-    await this.removeEntity(track);
+    return this.removeEntity(track);
   }
 
   private async addEntity(entity: Entity) {

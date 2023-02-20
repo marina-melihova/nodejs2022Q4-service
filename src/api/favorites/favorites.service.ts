@@ -5,7 +5,7 @@ import { Favorites, Entity, FavEntity } from '..';
 
 @Injectable()
 export class FavoritesService {
-  private _id: string;
+  private favId: string;
   constructor(
     @InjectRepository(Favorites)
     private favoritesRepository: Repository<Favorites>,
@@ -16,17 +16,17 @@ export class FavoritesService {
   async init() {
     const rows = await this.favoritesRepository.find();
     if (rows.length) {
-      this._id = rows[0].id;
+      this.favId = rows[0].id;
       return;
     }
     const newFavorites = this.favoritesRepository.create();
-    const favorites = await this.favoritesRepository.save(newFavorites);
-    this._id = favorites.id;
+    const fav = await this.favoritesRepository.save(newFavorites);
+    this.favId = fav.id;
   }
 
   async findAll(): Promise<Favorites> {
     const fav = await this.favoritesRepository.findOne({
-      where: { id: this._id },
+      where: { id: this.favId },
       relations: {
         artists: true,
         tracks: true,
@@ -37,19 +37,10 @@ export class FavoritesService {
     return fav;
   }
 
-  async getResponse() {
+  async findOneById(type: string, id: string): Promise<Entity | null> {
     const fav = await this.findAll();
-
-    fav.albums.forEach((album: any) => {
-      album.artistId = album.artistId?.id ?? null;
-    });
-
-    fav.tracks.forEach((track: any) => {
-      track.artistId = track.artistId?.id ?? null;
-      track.albumId = track.albumId?.id ?? null;
-    });
-
-    return fav;
+    const favEntity = fav[type].find((item: Entity) => item.id === id);
+    return favEntity ?? null;
   }
 
   async addToFavorite(entity: Entity): Promise<Favorites | null> {
@@ -74,9 +65,18 @@ export class FavoritesService {
     await this.favoritesRepository.save(fav);
   }
 
-  async findOneById(type: string, id: string): Promise<Entity | null> {
+  async getResponse() {
     const fav = await this.findAll();
-    const favEntity = fav[type].find((item: Entity) => item.id === id);
-    return favEntity ?? null;
+
+    fav.albums.forEach((album: any) => {
+      album.artistId = album.artistId?.id ?? null;
+    });
+
+    fav.tracks.forEach((track: any) => {
+      track.artistId = track.artistId?.id ?? null;
+      track.albumId = track.albumId?.id ?? null;
+    });
+
+    return fav;
   }
 }

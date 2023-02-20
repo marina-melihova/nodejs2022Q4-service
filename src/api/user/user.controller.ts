@@ -7,18 +7,15 @@ import {
   Body,
   Param,
   ParseUUIDPipe,
-  NotFoundException,
-  ForbiddenException,
   HttpCode,
   HttpStatus,
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
+import { NotFoundInterceptor } from '../../interceptors';
 import { UserService } from './user.service';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from './entity/user.entity';
-import { NotFoundInterceptor } from '../../interceptors/not-found.interceptor';
 
 @UseInterceptors(ClassSerializerInterceptor)
 @UseInterceptors(NotFoundInterceptor)
@@ -51,7 +48,7 @@ export class UserController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(@Param('id', new ParseUUIDPipe()) id: string) {
+  async delete(@Param('id', ParseUUIDPipe) id: string) {
     return this.userService.delete(id);
   }
 }

@@ -4,7 +4,6 @@ import {
   Post,
   Body,
   Param,
-  NotFoundException,
   Put,
   Delete,
   HttpCode,
@@ -13,7 +12,7 @@ import {
   UseInterceptors,
   ClassSerializerInterceptor,
 } from '@nestjs/common';
-import { NotFoundInterceptor } from './../../interceptors/not-found.interceptor';
+import { NotFoundInterceptor } from './../../interceptors';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
