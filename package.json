@@ -19,6 +19,7 @@
     "test:watch": "jest --watch",
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
+    "docker": "docker-compose up",
     "docker:scan": "docker scan webshaman/nodejs2022q4-service:app & docker scan webshaman/nodejs2022q4-service:db",
     "typeorm:cli": "ts-node -r tsconfig-paths/register ./node_modules/typeorm/cli.js -d src/config/ormconfig.ts",
     "migration:gen": "npm run typeorm:cli -- migration:generate src/migrations/schema",
@@ -45,7 +46,7 @@
     "rimraf": "^3.0.2",
     "rxjs": "^7.2.0",
     "swagger-ui-express": "^4.6.0",
-    "typeorm": "^0.3.12",
+    "typeorm": "^0.3.7",
     "uuid": "^8.3.2"
   },
   "devDependencies": {
