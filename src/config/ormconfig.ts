@@ -11,7 +11,6 @@ export const configService = {
   username: process.env.POSTGRES_USER,
   password: process.env.POSTGRES_PASSWORD,
   database: process.env.POSTGRES_DB,
-  dropSchema: true,
   synchronize: false,
   migrationsRun: true,
   entities: [User, Artist, Album, Track, Favorites],
