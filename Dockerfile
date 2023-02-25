@@ -6,4 +6,4 @@ COPY package*.json ./
 
 RUN npm ci && npm cache clean --force
 
-CMD npm run migration:run && npm run start:dev
+CMD npm run start:dev

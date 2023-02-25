@@ -5,6 +5,7 @@ import {
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entity/user.entity';
@@ -18,8 +19,9 @@ export class UserService {
 
   async create(dto: CreateUserDto): Promise<User> {
     await this.isLoginExists(dto.login);
-    const newUser = this.userRepository.create(dto);
-    return await this.userRepository.save(newUser);
+    const password = await bcrypt.hash(dto.password, +process.env.CRYPT_SALT);
+    const newUser = this.userRepository.create({ ...dto, password });
+    return this.userRepository.save(newUser);
   }
 
   async findAll(): Promise<User[]> {
@@ -38,13 +40,21 @@ export class UserService {
 
   async update(id: string, dto: UpdatePasswordDto): Promise<User | null> {
     const user = await this.findOneById(id);
-
     if (!user) return null;
 
-    if (user.password !== dto.oldPassword)
+    const isPasswordMatch = await bcrypt.compare(
+      dto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordMatch) {
       throw new ForbiddenException('Old Password is wrong');
+    }
 
-    await this.userRepository.update(id, { password: dto.newPassword });
+    const newPassword = await bcrypt.hash(
+      dto.newPassword,
+      +process.env.CRYPT_SALT,
+    );
+    await this.userRepository.update(id, { password: newPassword });
 
     return this.findOneById(id);
   }

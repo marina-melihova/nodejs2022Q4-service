@@ -15,6 +15,7 @@ Clone repo and switch to branch `typeorm`:
 git clone git@github.com:marina-melihova/nodejs2022Q4-service.git
 cd nodejs2022Q4-service
 git checkout typeorm
+npm ci
 ```
 
 Also you should provide environment variables to `.env` file (see temlate in file .env.example)
@@ -23,10 +24,28 @@ Also you should provide environment variables to `.env` file (see temlate in fil
 cp .env.example .env
 ```
 
+Before running the application on the local machine for the first time, run the migration to synchronize the database schema:
+
+```
+npm run migration:run
+```
+
+Run the application in production mode:
+
+```
+npm run start:prod
+```
+
+Run the application in development mode:
+
+```
+npm run start:dev
+```
+
 Compose image for docker and run the application in development mode:
 
 ```
-docker-compose up -d
+npm run docker
 ```
 
 By default app use port 4000. You can change port in `.env` file (copy .env.example). After starting the app you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/. For more information about OpenAPI/Swagger please visit https://swagger.io/.
@@ -66,25 +85,39 @@ npm run docker:scan
 
 After application running open new terminal and enter:
 
+To run all tests without authorization
+
+```
+npm run test
+```
+
+To run only one of all test suites
+
+```
+npm test -- <path to suite>
+```
+
+For example:
+
+```
+npm test -- test/favorites.e2e.spec.ts
+```
+
+To run tests inside the container after `npm run docker` in another terminal:
+
 ```
 docker exec -it app npm test
 ```
 
 Note: Sometimes when you run tests, they can run so fast that createTime equals updateTime (the creation and update of the record happened very quickly, because of which the timestamp was updated to the same value, as a result, the test fails). When this happens you need to clear the tables and run the tests again.
 
-To run only one of all test suites
-
-```
-docker exec -it app npm test -- <path to suite>
-```
-
-For example:
-
-```
-docker exec -it app npm test -- test/favorites.e2e.spec.ts
-```
-
 ### Find problems in code by ESLint
+
+```
+npm run lint
+```
+
+or inside the docker-container:
 
 ```
 docker exec -it app npm run lint

@@ -12,6 +12,7 @@ export enum FavEntity {
 }
 export { Artist, Album, Track, Favorites };
 export { User } from './user/entity/user.entity';
+export { CreateUserDto } from './user/dto/create-user.dto';
 
 export { IArtist } from './artist/interfaces/artist.interface';
 export { IAlbum } from './album/interfaces/album.interface';

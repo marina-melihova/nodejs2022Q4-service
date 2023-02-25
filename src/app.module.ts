@@ -11,6 +11,7 @@ import {
   FavoritesModule,
 } from './api';
 import { configService } from './config/ormconfig';
+import { AuthModule } from './api/auth/auth.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { configService } from './config/ormconfig';
     FavoritesModule,
     UserModule,
     TypeOrmModule.forRoot(configService),
+    AuthModule,
   ],
   controllers: [AppController],
   providers: [AppService],
