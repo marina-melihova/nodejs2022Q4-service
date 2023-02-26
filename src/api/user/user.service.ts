@@ -18,7 +18,6 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
-    await this.isLoginExists(dto.login);
     const password = await bcrypt.hash(dto.password, +process.env.CRYPT_SALT);
     const newUser = this.userRepository.create({ ...dto, password });
     return this.userRepository.save(newUser);
@@ -62,12 +61,5 @@ export class UserService {
   async delete(id: string): Promise<boolean> {
     const result = await this.userRepository.delete(id);
     return result.affected !== 0;
-  }
-
-  async isLoginExists(login: string) {
-    const user = await this.findOneByLogin(login);
-    if (user) {
-      throw new BadRequestException(`User with login=${login} already exists`);
-    }
   }
 }
