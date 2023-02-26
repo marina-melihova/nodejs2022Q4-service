@@ -13,7 +13,7 @@ import {
 } from './api';
 import { configService } from './config/ormconfig';
 import { AuthModule } from './api/auth/auth.module';
-import { AccessGuard } from './api/auth/quards/access.guard';
+import { AccessGuard } from './quards/access.guard';
 
 @Module({
   imports: [
