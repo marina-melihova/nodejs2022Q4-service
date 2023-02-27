@@ -1,67 +1,82 @@
 import { Injectable } from '@nestjs/common';
-import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
-import { FavoritesResponse } from './interfaces/favorites.interface';
-import { Track } from 'src/api/track/interfaces/track.interface';
-import { Album } from 'src/api/album/interfaces/album.interface';
-import { Artist } from 'src/api/artist/interfaces/artist.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Favorites, Entity, FavEntity } from '..';
 
 @Injectable()
 export class FavoritesService {
-  constructor(private db: InMemoryDBStorage) {}
-
-  findAll(): FavoritesResponse {
-    const artistsIds: string[] = this.db.favorites.artists;
-    const artists: Artist[] = this.db.artists.filter((artist: Artist) =>
-      artistsIds.includes(artist.id),
-    );
-
-    const albumsIds: string[] = this.db.favorites.albums;
-    const albums: Album[] = this.db.albums.filter((album: Album) =>
-      albumsIds.includes(album.id),
-    );
-
-    const tracksIds: string[] = this.db.favorites.tracks;
-    const tracks: Track[] = this.db.tracks.filter((track: Track) =>
-      tracksIds.includes(track.id),
-    );
-
-    return {
-      artists,
-      albums,
-      tracks,
-    };
+  private favId: string;
+  constructor(
+    @InjectRepository(Favorites)
+    private favoritesRepository: Repository<Favorites>,
+  ) {
+    this.init();
   }
 
-  findOneId(type: string, id: string): boolean {
-    const idx = this.db.favorites[type].findIndex(
-      (entityId) => entityId === id,
-    );
-    if (idx !== -1) {
-      return false;
+  async init() {
+    const rows = await this.favoritesRepository.find();
+    if (rows.length) {
+      this.favId = rows[0].id;
+      return;
     }
-    return true;
+    const newFavorites = this.favoritesRepository.create();
+    const fav = await this.favoritesRepository.save(newFavorites);
+    this.favId = fav.id;
   }
 
-  addId(type: string, id: string): number | null {
-    const idx = this.db.favorites[type].findIndex(
-      (entityId) => entityId === id,
-    );
-    if (idx !== -1) {
+  async findAll(): Promise<Favorites> {
+    const fav = await this.favoritesRepository.findOne({
+      where: { id: this.favId },
+      relations: {
+        artists: true,
+        tracks: true,
+        albums: true,
+      },
+    });
+
+    return fav;
+  }
+
+  async findOneById(type: string, id: string): Promise<Entity | null> {
+    const fav = await this.findAll();
+    const favEntity = fav[type].find((item: Entity) => item.id === id);
+    return favEntity ?? null;
+  }
+
+  async addToFavorite(entity: Entity): Promise<Favorites | null> {
+    const nameEntity = entity.constructor.name;
+    const typeEntity = FavEntity[nameEntity];
+    const existEntity = await this.findOneById(typeEntity, entity.id);
+    if (existEntity) {
       return null;
     }
-    return this.db.favorites[type].push(id);
+
+    const fav = await this.findAll();
+    fav[typeEntity].push(entity);
+    return this.favoritesRepository.save(fav);
   }
 
-  removeId(type: string, id: string): boolean {
-    const idx = this.db.favorites[type].findIndex(
-      (entityId: string) => entityId === id,
-    );
+  async removeFromFavorite(entity: Entity) {
+    const nameEntity = entity.constructor.name;
+    const typeEntity = FavEntity[nameEntity];
+    const fav = await this.findAll();
+    const idx = fav[typeEntity].findIndex((track) => track.id == entity.id);
+    fav[typeEntity].splice(idx, 1);
+    await this.favoritesRepository.save(fav);
+  }
 
-    if (idx === -1) {
-      return false;
-    }
+  async getResponse() {
+    const fav = await this.findAll();
 
-    this.db.favorites[type].splice(idx, 1);
-    return true;
+    fav.albums.forEach((album: any) => {
+      album.artistId = album.artistId?.id ?? null;
+    });
+
+    fav.tracks.forEach((track: any) => {
+      track.artistId = track.artistId?.id ?? null;
+      track.albumId = track.albumId?.id ?? null;
+    });
+
+    return fav;
   }
 }
