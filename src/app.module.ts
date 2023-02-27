@@ -1,5 +1,4 @@
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
-import { ConfigModule } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { APP_GUARD, APP_FILTER } from '@nestjs/core';
 import { AppController } from './app.controller';
@@ -20,7 +19,6 @@ import { AllExceptionsFilter } from './logger/exception-filter';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({ isGlobal: true }),
     ArtistModule,
     AlbumModule,
     TrackModule,

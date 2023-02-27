@@ -9,6 +9,7 @@ import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entity/user.entity';
+import config from '../../config';
 
 @Injectable()
 export class UserService {
@@ -18,7 +19,7 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
-    const password = await bcrypt.hash(dto.password, +process.env.CRYPT_SALT);
+    const password = await bcrypt.hash(dto.password, config.salt);
     const newUser = this.userRepository.create({ ...dto, password });
     return this.userRepository.save(newUser);
   }
@@ -46,15 +47,11 @@ export class UserService {
       user.password,
     );
     if (!isPasswordMatch) {
-      throw new ForbiddenException('Old Password is wrong');
+      throw new ForbiddenException('Old password is wrong');
     }
 
-    const newPassword = await bcrypt.hash(
-      dto.newPassword,
-      +process.env.CRYPT_SALT,
-    );
+    const newPassword = await bcrypt.hash(dto.newPassword, config.salt);
     await this.userRepository.update(id, { password: newPassword });
-
     return this.findOneById(id);
   }
 

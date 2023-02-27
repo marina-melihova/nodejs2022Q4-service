@@ -2,6 +2,7 @@ import { Injectable, NestMiddleware } from '@nestjs/common';
 import { Request, Response, NextFunction } from 'express';
 import * as bcrypt from 'bcrypt';
 import { LoggerService } from './logger.service';
+import config from '../config';
 
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
@@ -57,7 +58,7 @@ export class LoggerMiddleware implements NestMiddleware {
   }
 
   private async encode(word: string) {
-    return bcrypt.hash(word.toString(), +process.env.CRYPT_SALT);
+    return bcrypt.hash(word.toString(), config.salt);
   }
 
   private async getBodyForLog(body: any) {

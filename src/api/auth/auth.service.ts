@@ -1,10 +1,11 @@
 import { Injectable, ForbiddenException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
+import { TokenExpiredError } from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { User, CreateUserDto } from '..';
 import { AuthErrors, JwtPayload, Tokens } from './types';
-import { TokenExpiredError } from 'jsonwebtoken';
+import config from '../../config';
 
 @Injectable()
 export class AuthService {
@@ -29,13 +30,13 @@ export class AuthService {
 
   private getTokens(payload: JwtPayload): Tokens {
     const accessToken = this.jwtService.sign(payload, {
-      expiresIn: process.env.TOKEN_EXPIRE_TIME,
-      secret: process.env.JWT_SECRET_KEY,
+      expiresIn: config.tokenExpiresIn,
+      secret: config.secret,
     });
 
     const refreshToken = this.jwtService.sign(payload, {
-      expiresIn: process.env.TOKEN_REFRESH_EXPIRE_TIME,
-      secret: process.env.JWT_SECRET_REFRESH_KEY,
+      expiresIn: config.refreshTokenExp,
+      secret: config.secretRefresh,
     });
 
     return { accessToken, refreshToken };
@@ -45,7 +46,7 @@ export class AuthService {
     let userId: string, login: string;
     try {
       ({ userId, login } = await this.jwtService.verifyAsync(token, {
-        secret: process.env.JWT_SECRET_REFRESH_KEY,
+        secret: config.secretRefresh,
       }));
     } catch (err) {
       if (err instanceof TokenExpiredError) {

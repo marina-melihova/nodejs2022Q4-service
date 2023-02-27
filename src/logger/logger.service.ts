@@ -1,29 +1,12 @@
 import { ConsoleLogger, Injectable, LogLevel } from '@nestjs/common';
-import { createWriteStream, WriteStream } from 'fs';
+import { createWriteStream } from 'fs';
 import { stat } from 'fs/promises';
 import { resolve } from 'path';
+import config from '../config';
+import { IFileMap, IQueueMap, IStreamMap } from './interfaces';
 
-const logFileSize = +process.env.LOG_FILE_SIZE_KB;
 const logDir = resolve('./logs');
-
 const allLogLevels: LogLevel[] = ['error', 'warn', 'log', 'verbose', 'debug'];
-const configuredLogLevel = +process.env.LOG_LEVEL;
-const logLevels = allLogLevels.slice(0, configuredLogLevel);
-
-interface IFileMap {
-  log: string;
-  error: string;
-}
-
-interface IStreamMap {
-  log: WriteStream;
-  error: WriteStream;
-}
-
-interface IQueueMap {
-  log: string[];
-  error: string[];
-}
 
 @Injectable()
 export class LoggerService extends ConsoleLogger {
@@ -32,6 +15,7 @@ export class LoggerService extends ConsoleLogger {
   private writeStream: IStreamMap;
 
   constructor() {
+    const logLevels = allLogLevels.slice(0, config.logLevel + 1);
     super('App', { logLevels });
     this.init();
   }
@@ -82,7 +66,7 @@ export class LoggerService extends ConsoleLogger {
 
   private async writeToFile(logType: string) {
     const fileInfo = await stat(`${logDir}/${this.fileName[logType]}`);
-    const isFileFull = fileInfo.size / 1024 >= logFileSize;
+    const isFileFull = fileInfo.size / 1024 >= config.logFileSize;
 
     if (isFileFull) {
       this.createNewFile(logType);
