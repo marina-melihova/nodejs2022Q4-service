@@ -1,55 +1,41 @@
-import { v4 as uuidv4 } from 'uuid';
 import { Injectable } from '@nestjs/common';
-import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
-import { Artist } from './interfaces/artist.interface';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { Artist } from './entity/artist.entity';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { FavoritesService } from './../favorites/favorites.service';
 
 @Injectable()
 export class ArtistService {
   constructor(
-    private db: InMemoryDBStorage,
-    private favoritesService: FavoritesService,
+    @InjectRepository(Artist)
+    private artistRepository: Repository<Artist>,
   ) {}
 
-  findAll(): Artist[] {
-    return this.db.artists;
+  async create(dto: CreateArtistDto): Promise<Artist> {
+    const artist = this.artistRepository.create(dto);
+    return this.artistRepository.save(artist);
   }
 
-  findOneById(id: string): Artist | null {
-    const artist = this.db.artists.find((artist: Artist) => artist.id === id);
-    return artist ?? null;
+  async findAll(): Promise<Artist[]> {
+    return this.artistRepository.find();
   }
 
-  create(dto: CreateArtistDto): Artist {
-    const artist = { id: uuidv4(), ...dto };
-    this.db.artists.push(artist);
-    return artist;
+  async findOneById(id: string): Promise<Artist | null> {
+    return this.artistRepository.findOne({ where: { id } });
   }
 
-  update(id: string, dto: UpdateArtistDto): Artist | null {
-    const idx = this.db.artists.findIndex((artist) => artist.id === id);
-    if (idx === -1) {
+  async update(id: string, dto: UpdateArtistDto): Promise<Artist | null> {
+    const artist: Artist = await this.findOneById(id);
+    if (!artist) {
       return null;
     }
-    const updatedArtist = { ...this.db.artists[idx], ...dto };
-    this.db.artists.splice(idx, 1, updatedArtist);
+    const updatedArtist = await this.artistRepository.save({ id, ...dto });
     return updatedArtist;
   }
 
-  delete(id: string): boolean {
-    const idx = this.db.artists.findIndex((artist) => artist.id === id);
-    if (idx === -1) {
-      return false;
-    }
-
-    const result = this.favoritesService.findOneId('artists', id);
-    if (!result) {
-      this.favoritesService.removeId('artists', id);
-    }
-
-    this.db.artists.splice(idx, 1);
-    return true;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.artistRepository.delete({ id });
+    return result.affected !== 0;
   }
 }

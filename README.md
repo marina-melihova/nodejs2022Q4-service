@@ -5,25 +5,81 @@
 - Git - [Download & Install Git](https://git-scm.com/downloads).
 - Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
 
-## Downloading
+See details of [the task](https://github.com/AlreadyBored/nodejs-assignments/blob/main/assignments/containerization-database-orm/assignment.md).
+
+## ⚙️ How to install and run
+
+Clone repo and switch to branch `typeorm`:
 
 ```
-git clone {repository URL}
+git clone git@github.com:marina-melihova/nodejs2022Q4-service.git
+cd nodejs2022Q4-service
+git checkout typeorm
+npm ci
 ```
 
-## Installing NPM modules
+Also you should provide environment variables to `.env` file (see temlate in file .env.example)
 
 ```
-npm install
+cp .env.example .env
 ```
 
-## Running application
+Before running the application on the local machine for the first time, run the migration to synchronize the database schema:
 
 ```
-npm start
+npm run migration:run
 ```
 
-By default app use port 4000. You can change port in `.env` file (create it similarly .env.example). After starting the app you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/. For more information about OpenAPI/Swagger please visit https://swagger.io/.
+Run the application in production mode:
+
+```
+npm run start:prod
+```
+
+Run the application in development mode:
+
+```
+npm run start:dev
+```
+
+Compose image for docker and run the application in development mode:
+
+```
+npm run docker
+```
+
+By default app use port 4000. You can change port in `.env` file (copy .env.example). After starting the app you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/. For more information about OpenAPI/Swagger please visit https://swagger.io/.
+
+**Note:** Authorization will be added in the following tasks
+
+During `docker-compose up` the migration is executed to update database schema.
+
+## Docker
+
+You can compose images:
+
+```
+docker compose -f "docker-compose.yaml" up --build
+```
+
+or download images from docker hub:
+
+```
+docker pull webshaman/nodejs2022q4-service:app
+docker pull webshaman/nodejs2022q4-service:db
+```
+
+Final size of the Docker image with application is less than 500 MB:  
+![image-size](https://user-images.githubusercontent.com/64692860/220200743-ce67a435-5f03-434d-9aa6-9f3b875d73a6.PNG)
+
+Database files and logs to be stored in volumes:  
+![pg-data](https://user-images.githubusercontent.com/64692860/220201434-6b5a75db-fe73-46b6-95cd-7af4de8e3be8.PNG)
+
+Scan vulnerablities of images:
+
+```
+npm run docker:scan
+```
 
 ## Testing
 
@@ -38,35 +94,31 @@ npm run test
 To run only one of all test suites
 
 ```
-npm run test -- <path to suite>
+npm test -- <path to suite>
 ```
 
-To run all test with authorization
+For example:
 
 ```
-npm run test:auth
+npm test -- test/favorites.e2e.spec.ts
 ```
 
-To run only specific test suite with authorization
+To run tests inside the container after `npm run docker` in another terminal:
 
 ```
-npm run test:auth -- <path to suite>
+docker exec -it app npm test
 ```
 
-**Note:** Authorization will be added in the following tasks
+Note: Sometimes when you run tests, they can run so fast that createTime equals updateTime (the creation and update of the record happened very quickly, because of which the timestamp was updated to the same value, as a result, the test fails). When this happens you need to clear the tables and run the tests again.
 
-### Auto-fix and format
+### Find problems in code by ESLint
 
 ```
 npm run lint
 ```
 
+or inside the docker-container:
+
 ```
-npm run format
+docker exec -it app npm run lint
 ```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
