@@ -1,9 +1,22 @@
+import { AlbumModule } from './api/album/album.module';
 import { Module } from '@nestjs/common';
+import { ConfigModule } from '@nestjs/config';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ArtistModule } from './api/artist/atrist.module';
+import { TrackModule } from './api/track/track.module';
+import { FavoritesModule } from './api/favorites/favorites.module';
+import { UserModule } from './api/user/user.module';
 
 @Module({
-  imports: [],
+  imports: [
+    ConfigModule.forRoot(),
+    ArtistModule,
+    TrackModule,
+    AlbumModule,
+    FavoritesModule,
+    UserModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })
