@@ -1,7 +1,7 @@
 import {
   Injectable,
   ForbiddenException,
-  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -58,8 +58,10 @@ export class UserService {
     return this.findOneById(id);
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     const result = await this.userRepository.delete(id);
-    return result.affected !== 0;
+    if (!result.affected) {
+      throw new NotFoundException('User not found');
+    }
   }
 }

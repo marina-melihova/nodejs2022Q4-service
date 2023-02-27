@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateTrackDto } from './dto/create-track.dto';
@@ -37,8 +37,10 @@ export class TrackService {
     return updatedTrack;
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     const result = await this.trackRepository.delete({ id });
-    return result.affected !== 0;
+    if (!result.affected) {
+      throw new NotFoundException('Track not found');
+    }
   }
 }

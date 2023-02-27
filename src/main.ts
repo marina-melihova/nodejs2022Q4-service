@@ -6,20 +6,22 @@ import { ConfigService } from '@nestjs/config';
 import { readFile } from 'fs/promises';
 import * as yaml from 'yaml';
 import { AppModule } from './app.module';
+import { LoggerService } from './logger/logger.service';
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, { bufferLogs: true });
 
   app.useGlobalPipes(new ValidationPipe());
   app.useGlobalInterceptors(new HeadersInterceptor());
 
+  app.useLogger(app.get(LoggerService));
   const configService = app.get(ConfigService);
-  const PORT = configService.get('PORT') || 4000;
 
   const apiFile = await readFile('./doc/api.yaml', { encoding: 'utf8' });
   const schema = yaml.parse(apiFile);
   SwaggerModule.setup('doc', app, schema);
 
+  const PORT = configService.get('PORT') || 4000;
   await app.listen(PORT);
 }
 bootstrap();

@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Artist } from './entity/artist.entity';
@@ -34,8 +34,10 @@ export class ArtistService {
     return updatedArtist;
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     const result = await this.artistRepository.delete({ id });
-    return result.affected !== 0;
+    if (!result.affected) {
+      throw new NotFoundException('Artist not found');
+    }
   }
 }

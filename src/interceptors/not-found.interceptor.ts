@@ -11,9 +11,14 @@ import { Observable, tap } from 'rxjs';
 export class NotFoundInterceptor implements NestInterceptor {
   intercept(context: ExecutionContext, next: CallHandler): Observable<any> {
     {
+      const ctx = context.switchToHttp();
+      const { method } = ctx.getRequest();
+
       return next.handle().pipe(
         tap((data) => {
-          if (!data) throw new NotFoundException('Entity not found');
+          if (method !== 'DELETE' && !data) {
+            throw new NotFoundException('Entity not found');
+          }
         }),
       );
     }
