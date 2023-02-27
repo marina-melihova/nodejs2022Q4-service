@@ -1,62 +1,63 @@
-import { Injectable } from '@nestjs/common';
-import { v4 as uuidv4 } from 'uuid';
-import { InMemoryDBStorage } from './../../store/in-memory.db.storage';
+import {
+  Injectable,
+  ForbiddenException,
+  BadRequestException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
-import { User } from './user.entity';
+import { User } from './entity/user.entity';
 
 @Injectable()
 export class UserService {
-  constructor(private db: InMemoryDBStorage) {}
+  constructor(
+    @InjectRepository(User)
+    private userRepository: Repository<User>,
+  ) {}
 
-  create(dto: CreateUserDto) {
-    const currentDate = Date.now();
-    const newUser = new User({
-      id: uuidv4(),
-      ...dto,
-      version: 1,
-      createdAt: currentDate,
-      updatedAt: currentDate,
-    });
-    this.db.users.push(newUser);
-    return newUser;
+  async create(dto: CreateUserDto): Promise<User> {
+    await this.isLoginExists(dto.login);
+    const newUser = this.userRepository.create(dto);
+    return await this.userRepository.save(newUser);
   }
 
-  findAll() {
-    return this.db.users;
+  async findAll(): Promise<User[]> {
+    return this.userRepository.find();
   }
 
-  findOneById(id: string): User | null {
-    const user = this.db.users.find((user) => user.id === id);
+  async findOneById(id: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ id });
+    return user ?? null;
+  }
+
+  async findOneByLogin(login: string): Promise<User | null> {
+    const user = await this.userRepository.findOneBy({ login });
+    return user ?? null;
+  }
+
+  async update(id: string, dto: UpdatePasswordDto): Promise<User | null> {
+    const user = await this.findOneById(id);
+
     if (!user) return null;
-    return user;
-  }
 
-  update(id: string, dto: UpdatePasswordDto): User | null {
-    const idx = this.db.users.findIndex((user) => user.id === id);
-    if (idx === -1) return null;
-
-    const user = this.db.users[idx];
     if (user.password !== dto.oldPassword)
-      throw new Error('Old Password is wrong');
+      throw new ForbiddenException('Old Password is wrong');
 
-    const updatedUser = new User({
-      ...user,
-      password: dto.newPassword,
-      version: user.version + 1,
-      updatedAt: Date.now(),
-    });
+    await this.userRepository.update(id, { password: dto.newPassword });
 
-    this.db.users.splice(idx, 1, updatedUser);
-    return updatedUser;
+    return this.findOneById(id);
   }
 
-  delete(id: string): boolean {
-    const idx = this.db.users.findIndex((user) => user.id === id);
-    if (idx === -1) {
-      return false;
+  async delete(id: string): Promise<boolean> {
+    const result = await this.userRepository.delete(id);
+    return result.affected !== 0;
+  }
+
+  async isLoginExists(login: string) {
+    const user = await this.findOneByLogin(login);
+    if (user) {
+      throw new BadRequestException(`User with login=${login} already exists`);
     }
-    this.db.users.splice(idx, 1);
-    return true;
   }
 }

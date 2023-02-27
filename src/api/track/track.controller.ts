@@ -4,83 +4,51 @@ import {
   Post,
   Body,
   Param,
-  NotFoundException,
   Put,
   Delete,
   HttpCode,
+  HttpStatus,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
+import { NotFoundInterceptor } from './../../interceptors';
 import { TrackService } from './track.service';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { ArtistService } from './../artist/artist.service';
-import { AlbumService } from './../album/album.service';
 
+@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(NotFoundInterceptor)
 @Controller('track')
 export class TrackController {
-  constructor(
-    private trackService: TrackService,
-    private artistService: ArtistService,
-    private albumService: AlbumService,
-  ) {}
+  constructor(private trackService: TrackService) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.trackService.findAll();
   }
 
   @Get(':id')
-  findOneById(@Param('id', new ParseUUIDPipe()) id: string) {
-    const track = this.trackService.findOneById(id);
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
-    return track;
+  async findOneById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.trackService.findOneById(id);
   }
 
   @Post()
-  create(@Body() dto: CreateTrackDto) {
-    this.validateRefs(dto);
+  async create(@Body() dto: CreateTrackDto) {
     return this.trackService.create(dto);
   }
 
   @Put(':id')
-  update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateTrackDto,
   ) {
-    this.validateRefs(dto);
-    const track = this.trackService.update(id, dto);
-    if (!track) {
-      throw new NotFoundException('Track not found');
-    }
-    return track;
+    return this.trackService.update(id, dto);
   }
 
   @Delete(':id')
-  @HttpCode(204)
-  delete(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = this.trackService.delete(id);
-    if (!result) {
-      throw new NotFoundException('Track not found');
-    }
-  }
-
-  validateRefs(dto: CreateTrackDto | UpdateTrackDto) {
-    if (dto.artistId) {
-      const isArtistExist = this.artistService.findOneById(dto.artistId);
-      if (!isArtistExist) {
-        throw new NotFoundException(
-          `Artist with ID = ${dto.artistId} not found`,
-        );
-      }
-    }
-
-    if (dto.albumId) {
-      const isAlbumExist = this.albumService.findOneById(dto.albumId);
-      if (!isAlbumExist) {
-        throw new NotFoundException(`Album with ID = ${dto.albumId} not found`);
-      }
-    }
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.trackService.delete(id);
   }
 }

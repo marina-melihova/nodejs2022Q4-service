@@ -1,19 +1,13 @@
-import { ArtistService } from './../artist/artist.service';
 import { Module } from '@nestjs/common';
-import { InMemoryDBStorage } from 'src/store/in-memory.db.storage';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { TrackService } from './track.service';
 import { TrackController } from './track.controller';
-import { FavoritesService } from './../favorites/favorites.service';
-import { AlbumService } from './../album/album.service';
+import { Track } from './entity/track.entity';
 
 @Module({
+  imports: [TypeOrmModule.forFeature([Track])],
   controllers: [TrackController],
-  providers: [
-    InMemoryDBStorage,
-    TrackService,
-    FavoritesService,
-    ArtistService,
-    AlbumService,
-  ],
+  providers: [TrackService],
+  exports: [TrackService],
 })
 export class TrackModule {}

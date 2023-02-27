@@ -1,0 +1,44 @@
+services:
+  app:
+    image: nodejs2022q4-service:app
+    container_name: app
+    build: .
+    ports:
+      - ${PORT}:${PORT}
+    env_file:
+      - .env
+    environment:
+      POSTGRES_HOST: db
+    volumes:
+      - ./:/home/app
+      - nodemodules:/home/app/node_modules
+    depends_on:
+      - db
+    networks:
+      - network_1
+    restart: on-failure
+  db:
+    image: nodejs2022q4-service:db
+    container_name: db
+    build: ./db
+    networks:
+      - network_1
+    volumes:
+      - postgres:/var/lib/postgresql/data
+    env_file:
+      - .env
+    restart: always
+    command: postgres -c logging_collector=on -c log_destination=stderr
+
+volumes:
+  nodemodules:
+    name: nodemodules
+  postgres:
+    name: postgres
+
+networks:
+  network_1:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.28.0.0/16

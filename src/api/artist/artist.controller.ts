@@ -4,65 +4,51 @@ import {
   Post,
   Body,
   Param,
-  NotFoundException,
   Put,
   Delete,
   HttpCode,
+  HttpStatus,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
+import { NotFoundInterceptor } from './../../interceptors';
 import { ArtistService } from './artist.service';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { TrackService } from './../track/track.service';
-import { AlbumService } from './../album/album.service';
 
+@UseInterceptors(ClassSerializerInterceptor)
+@UseInterceptors(NotFoundInterceptor)
 @Controller('artist')
 export class ArtistController {
-  constructor(
-    private artistService: ArtistService,
-    private tracksService: TrackService,
-    private albumsService: AlbumService,
-  ) {}
+  constructor(private artistService: ArtistService) {}
 
   @Get()
-  findAll() {
+  async findAll() {
     return this.artistService.findAll();
   }
 
   @Get(':id')
-  findOneById(@Param('id', new ParseUUIDPipe()) id: string) {
-    const artist = this.artistService.findOneById(id);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
-    return artist;
+  async findOneById(@Param('id', ParseUUIDPipe) id: string) {
+    return this.artistService.findOneById(id);
   }
 
   @Post()
-  create(@Body() dto: CreateArtistDto) {
+  async create(@Body() dto: CreateArtistDto) {
     return this.artistService.create(dto);
   }
 
   @Put(':id')
-  update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+  async update(
+    @Param('id', ParseUUIDPipe) id: string,
     @Body() dto: UpdateArtistDto,
   ) {
-    const artist = this.artistService.update(id, dto);
-    if (!artist) {
-      throw new NotFoundException('Artist not found');
-    }
-    return artist;
+    return this.artistService.update(id, dto);
   }
 
   @Delete(':id')
-  @HttpCode(204)
-  delete(@Param('id', new ParseUUIDPipe()) id: string) {
-    const result = this.artistService.delete(id);
-    if (!result) {
-      throw new NotFoundException('Artist not found');
-    }
-    this.tracksService.removeArtist(id);
-    this.albumsService.removeArtist(id);
+  @HttpCode(HttpStatus.NO_CONTENT)
+  async delete(@Param('id', ParseUUIDPipe) id: string) {
+    return this.artistService.delete(id);
   }
 }
