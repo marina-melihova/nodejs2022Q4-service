@@ -14,12 +14,16 @@ export class LoggerMiddleware implements NestMiddleware {
       this.logger.error(
         `Unhandled Rejection at: ${promise}, reason: ${reason}`,
       );
+      throw reason;
     });
 
-    process.on('uncaughtException', (err, origin) => {
+    process.on('uncaughtException', (err: any, origin) => {
       this.logger.error(
-        `Caught exception: ${err}\n` + `Exception origin: ${origin}`,
+        `Caught exception: ${err.toString()}\n` + `Exception origin: ${origin}`,
       );
+      if (!err.isOperational) {
+        process.exit(1);
+      }
     });
   }
 

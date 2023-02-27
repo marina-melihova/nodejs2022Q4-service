@@ -1,4 +1,4 @@
-import { Injectable, ForbiddenException } from '@nestjs/common';
+import { Injectable, ForbiddenException, HttpStatus } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { TokenExpiredError } from 'jsonwebtoken';
 import * as bcrypt from 'bcrypt';
@@ -6,6 +6,7 @@ import { UserService } from '../user/user.service';
 import { User, CreateUserDto } from '..';
 import { AuthErrors, JwtPayload, Tokens } from './types';
 import config from '../../config';
+import { AppError } from '../../common';
 
 @Injectable()
 export class AuthService {
@@ -43,11 +44,19 @@ export class AuthService {
   }
 
   async refresh(token: string) {
-    let userId: string, login: string;
     try {
-      ({ userId, login } = await this.jwtService.verifyAsync(token, {
+      const { userId, login } = await this.jwtService.verifyAsync(token, {
         secret: config.secretRefresh,
-      }));
+      });
+      const user: User = await this.userService.findOneById(userId);
+      if (!user) {
+        throw new AppError(
+          HttpStatus.UNAUTHORIZED,
+          true,
+          AuthErrors.UNAUTHORIZED,
+        );
+      }
+      return this.getTokens({ login, userId });
     } catch (err) {
       if (err instanceof TokenExpiredError) {
         throw new ForbiddenException(AuthErrors.REFRESH_EXPIRED);
@@ -55,10 +64,5 @@ export class AuthService {
         throw new ForbiddenException(AuthErrors.REFRESH_MALFORMED);
       }
     }
-    const user: User = await this.userService.findOneById(userId);
-    if (!user) {
-      throw new ForbiddenException(AuthErrors.UNAUTHORIZED);
-    }
-    return this.getTokens({ login, userId });
   }
 }
