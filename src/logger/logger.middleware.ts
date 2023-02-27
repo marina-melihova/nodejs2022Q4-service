@@ -8,7 +8,19 @@ export class LoggerMiddleware implements NestMiddleware {
   private context = 'App';
   private resData: string = '';
 
-  constructor(private logger: LoggerService) {}
+  constructor(private logger: LoggerService) {
+    process.on('unhandledRejection', (reason, promise) => {
+      this.logger.error(
+        `Unhandled Rejection at: ${promise}, reason: ${reason}`,
+      );
+    });
+
+    process.on('uncaughtException', (err, origin) => {
+      this.logger.error(
+        `Caught exception: ${err}\n` + `Exception origin: ${origin}`,
+      );
+    });
+  }
 
   async use(
     request: Request,
