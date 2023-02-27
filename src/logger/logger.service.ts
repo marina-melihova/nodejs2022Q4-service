@@ -12,6 +12,8 @@ const logLevels = allLogLevels.slice(0, configuredLogLevel);
 
 @Injectable()
 export class LoggerService extends ConsoleLogger {
+  private messageQueue = [];
+
   constructor() {
     super('App', { logLevels });
   }

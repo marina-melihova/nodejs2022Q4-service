@@ -22,6 +22,9 @@ export class LoggerMiddleware implements NestMiddleware {
 
     response.on('finish', () => {
       const { statusCode, statusMessage } = response;
+      if (statusCode >= 500) {
+        return;
+      }
 
       const message = `${method} ${originalUrl} ${statusCode} ${statusMessage} - Request body: ${JSON.stringify(
         reqBody,
@@ -30,10 +33,6 @@ export class LoggerMiddleware implements NestMiddleware {
       )}, query: ${JSON.stringify(query)} - Response data: ${
         this.resData ? JSON.stringify(this.resData, null, 2) : statusMessage
       }`;
-
-      if (statusCode >= 500) {
-        return this.logger.error(message, this.context);
-      }
 
       if (statusCode >= 400) {
         return this.logger.warn(message, this.context);
