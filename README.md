@@ -61,12 +61,6 @@ docker pull webshaman/nodejs2022q4-service:app
 docker pull webshaman/nodejs2022q4-service:db
 ```
 
-Final size of the Docker image with application is less than 500 MB:  
-![image-size](https://user-images.githubusercontent.com/64692860/220200743-ce67a435-5f03-434d-9aa6-9f3b875d73a6.PNG)
-
-Database files and logs to be stored in volumes:  
-![pg-data](https://user-images.githubusercontent.com/64692860/220201434-6b5a75db-fe73-46b6-95cd-7af4de8e3be8.PNG)
-
 Scan vulnerablities of images:
 
 ```
