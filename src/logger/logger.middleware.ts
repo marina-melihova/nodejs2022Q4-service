@@ -6,7 +6,7 @@ import { LoggerService } from './logger.service';
 @Injectable()
 export class LoggerMiddleware implements NestMiddleware {
   private context = 'App';
-  private resData: string = '';
+  private resData = '';
 
   constructor(private logger: LoggerService) {
     process.on('unhandledRejection', (reason, promise) => {
@@ -76,7 +76,7 @@ export class LoggerMiddleware implements NestMiddleware {
   }
 
   private getResponse(res: Response) {
-    let send = res.send;
+    const send = res.send;
     res.send = (data) => {
       this.resData = data ? JSON.parse(data.toString()) : '';
       res.send = send;

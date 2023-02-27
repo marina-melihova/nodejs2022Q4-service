@@ -3,6 +3,9 @@ import { Album } from './album/entity/album.entity';
 import { Track } from './track/entity/track.entity';
 import { Favorites } from './favorites/entity/favorites.entity';
 
+export interface IResponse {
+  message: string;
+}
 export const enitities = [Artist, Album, Track, Favorites];
 export type Entity = Artist | Album | Track;
 export enum FavEntity {
