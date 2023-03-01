@@ -23,6 +23,7 @@ Also you should provide environment variables to `.env` file (see template in fi
 ```
 cp .env.example .env
 ```
+**Before running the application on the local machine for the first time, you have to create the directory "logs" in the project root:**  `mkdir logs`
 
 Run the application in production mode:
 
