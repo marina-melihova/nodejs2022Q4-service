@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Favorites, Entity, FavEntity } from '..';
+import { Favorites, Entity, FavEntity, IFavoritesResponse } from '..';
 
 @Injectable()
 export class FavoritesService {
@@ -27,11 +27,7 @@ export class FavoritesService {
   async findAll(): Promise<Favorites> {
     const fav = await this.favoritesRepository.findOne({
       where: { id: this.favId },
-      relations: {
-        artists: true,
-        tracks: true,
-        albums: true,
-      },
+      relations: ['artists', 'tracks', 'albums'],
     });
 
     return fav;
@@ -56,16 +52,20 @@ export class FavoritesService {
     return this.favoritesRepository.save(fav);
   }
 
-  async removeFromFavorite(entity: Entity) {
+  async removeFromFavorite(entity: Entity): Promise<void> {
     const nameEntity = entity.constructor.name;
     const typeEntity = FavEntity[nameEntity];
     const fav = await this.findAll();
-    const idx = fav[typeEntity].findIndex((track) => track.id == entity.id);
-    fav[typeEntity].splice(idx, 1);
-    await this.favoritesRepository.save(fav);
+    const idx = fav[typeEntity].findIndex(
+      (item: Entity) => item.id == entity.id,
+    );
+    const removedItems = fav[typeEntity].splice(idx, 1);
+    if (removedItems.length) {
+      await this.favoritesRepository.save(fav);
+    }
   }
 
-  async getResponse() {
+  async getResponse(): Promise<IFavoritesResponse> {
     const fav = await this.findAll();
 
     fav.albums.forEach((album: any) => {

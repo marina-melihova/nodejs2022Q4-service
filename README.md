@@ -9,26 +9,21 @@ See details of [the task](https://github.com/AlreadyBored/nodejs-assignments/blo
 
 ## ⚙️ How to install and run
 
-Clone repo and switch to branch `typeorm`:
+Clone repo and switch to branch `auth-logger`:
 
 ```
 git clone git@github.com:marina-melihova/nodejs2022Q4-service.git
 cd nodejs2022Q4-service
-git checkout typeorm
+git checkout auth-logger
 npm ci
 ```
 
-Also you should provide environment variables to `.env` file (see temlate in file .env.example)
+Also you should provide environment variables to `.env` file (see template in file .env.example)
 
 ```
 cp .env.example .env
 ```
-
-Before running the application on the local machine for the first time, run the migration to synchronize the database schema:
-
-```
-npm run migration:run
-```
+**Before running the application on the local machine for the first time, you have to create the directory "logs" in the project root:**  `mkdir logs`
 
 Run the application in production mode:
 
@@ -50,8 +45,6 @@ npm run docker
 
 By default app use port 4000. You can change port in `.env` file (copy .env.example). After starting the app you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/. For more information about OpenAPI/Swagger please visit https://swagger.io/.
 
-**Note:** Authorization will be added in the following tasks
-
 During `docker-compose up` the migration is executed to update database schema.
 
 ## Docker
@@ -69,12 +62,6 @@ docker pull webshaman/nodejs2022q4-service:app
 docker pull webshaman/nodejs2022q4-service:db
 ```
 
-Final size of the Docker image with application is less than 500 MB:  
-![image-size](https://user-images.githubusercontent.com/64692860/220200743-ce67a435-5f03-434d-9aa6-9f3b875d73a6.PNG)
-
-Database files and logs to be stored in volumes:  
-![pg-data](https://user-images.githubusercontent.com/64692860/220201434-6b5a75db-fe73-46b6-95cd-7af4de8e3be8.PNG)
-
 Scan vulnerablities of images:
 
 ```
@@ -85,28 +72,28 @@ npm run docker:scan
 
 After application running open new terminal and enter:
 
-To run all tests without authorization
+To run all tests with authorization:
 
 ```
-npm run test
+npm run test:auth
 ```
 
 To run only one of all test suites
 
 ```
-npm test -- <path to suite>
+npm run test:auth -- <path to suite>
 ```
 
 For example:
 
 ```
-npm test -- test/favorites.e2e.spec.ts
+npm run test:auth -- test/favorites.e2e.spec.ts
 ```
 
 To run tests inside the container after `npm run docker` in another terminal:
 
 ```
-docker exec -it app npm test
+docker exec -it app npm run test:auth
 ```
 
 Note: Sometimes when you run tests, they can run so fast that createTime equals updateTime (the creation and update of the record happened very quickly, because of which the timestamp was updated to the same value, as a result, the test fails). When this happens you need to clear the tables and run the tests again.

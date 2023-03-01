@@ -10,8 +10,9 @@ services:
     environment:
       POSTGRES_HOST: db
     volumes:
-      - ./:/home/app
-      - nodemodules:/home/app/node_modules
+      - ./src:/home/app/src
+      - logs:/home/app/logs
+      - node_modules:/home/app/node_modules
     depends_on:
       - db
     networks:
@@ -31,8 +32,10 @@ services:
     command: postgres -c logging_collector=on -c log_destination=stderr
 
 volumes:
-  nodemodules:
-    name: nodemodules
+  node_modules:
+    name: node_modules
+  logs:
+    name: logs
   postgres:
     name: postgres
 

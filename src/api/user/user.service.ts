@@ -1,13 +1,15 @@
 import {
   Injectable,
   ForbiddenException,
-  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdatePasswordDto } from './dto/update-password.dto';
 import { User } from './entity/user.entity';
+import config from '../../config';
 
 @Injectable()
 export class UserService {
@@ -17,9 +19,9 @@ export class UserService {
   ) {}
 
   async create(dto: CreateUserDto): Promise<User> {
-    await this.isLoginExists(dto.login);
-    const newUser = this.userRepository.create(dto);
-    return await this.userRepository.save(newUser);
+    const password = await bcrypt.hash(dto.password, config.salt);
+    const newUser = this.userRepository.create({ ...dto, password });
+    return this.userRepository.save(newUser);
   }
 
   async findAll(): Promise<User[]> {
@@ -38,26 +40,25 @@ export class UserService {
 
   async update(id: string, dto: UpdatePasswordDto): Promise<User | null> {
     const user = await this.findOneById(id);
-
     if (!user) return null;
 
-    if (user.password !== dto.oldPassword)
-      throw new ForbiddenException('Old Password is wrong');
+    const isPasswordMatch = await bcrypt.compare(
+      dto.oldPassword,
+      user.password,
+    );
+    if (!isPasswordMatch) {
+      throw new ForbiddenException('Old password is wrong');
+    }
 
-    await this.userRepository.update(id, { password: dto.newPassword });
-
+    const newPassword = await bcrypt.hash(dto.newPassword, config.salt);
+    await this.userRepository.update(id, { password: newPassword });
     return this.findOneById(id);
   }
 
-  async delete(id: string): Promise<boolean> {
+  async delete(id: string): Promise<void> {
     const result = await this.userRepository.delete(id);
-    return result.affected !== 0;
-  }
-
-  async isLoginExists(login: string) {
-    const user = await this.findOneByLogin(login);
-    if (user) {
-      throw new BadRequestException(`User with login=${login} already exists`);
+    if (!result.affected) {
+      throw new NotFoundException('User not found');
     }
   }
 }

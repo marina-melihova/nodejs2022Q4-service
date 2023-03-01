@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateAlbumDto } from './dto/create-album.dto';
@@ -37,8 +37,10 @@ export class AlbumService {
     return updatedAlbum;
   }
 
-  async delete(id: string) {
+  async delete(id: string): Promise<void> {
     const result = await this.albumRepository.delete({ id });
-    return result.affected !== 0;
+    if (!result.affected) {
+      throw new NotFoundException('Album not found');
+    }
   }
 }
